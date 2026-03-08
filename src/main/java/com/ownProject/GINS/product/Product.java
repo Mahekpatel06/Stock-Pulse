@@ -16,15 +16,18 @@ public class Product {
 	
 	private Integer quantity;
 	
+	private Double price;
+	
 	public Product() {
 		super();
 	}
 	
-	public Product(Integer id, String name, Integer quantity) {
+	public Product(Integer id, String name, Integer quantity, Double price) {
 		super();
 		this.id = id;
 		this.name = name;
 		this.quantity = quantity;
+		this.price = price;
 	}
 	
 	public Integer getId() {
@@ -45,10 +48,16 @@ public class Product {
 	public void setQuantity(Integer quantity) {
 		this.quantity = quantity;
 	}
+	public Double getPrice() {
+		return price;
+	}
+	public void setPrice(Double price) {
+		this.price = price;
+	}
 	
 	@Override
 	public String toString() {
-		return "Product [id=" + id + ", name=" + name + ", quantity=" + quantity + "]";
+		return "Product [id=" + id + ", name=" + name + ", quantity=" + quantity + ", price=" + price + "]";
 	}
 	
 }
