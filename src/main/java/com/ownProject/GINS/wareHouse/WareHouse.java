@@ -67,7 +67,7 @@ public class WareHouse {
 	public void setCountryCode(String countryCode) {
 		this.countryCode = countryCode;
 	}
-	public boolean isIs_active() {
+	public boolean getIs_active() {
 		return is_active;
 	}
 	public void setIs_active(boolean is_active) {
