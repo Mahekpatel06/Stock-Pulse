@@ -7,6 +7,7 @@ import java.net.URI;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Optional;
+import java.util.UUID;
 
 import org.springframework.hateoas.EntityModel;
 import org.springframework.http.ResponseEntity;
@@ -49,7 +50,7 @@ public class ProductController {
 	}
 
 	@GetMapping("/products/{id}")
-	public EntityModel<Product> getItem(@PathVariable int id) {
+	public EntityModel<Product> getItem(@PathVariable UUID id) {
 		Optional<Product> product = productRepository.findById(id);
 
 		if (product.isEmpty()) {
@@ -67,7 +68,7 @@ public class ProductController {
 	}
 
 	@PutMapping("/products/{id}")
-	public ResponseEntity<Product> updateItem(@PathVariable int id, @RequestBody Product product) {
+	public ResponseEntity<Product> updateItem(@PathVariable UUID id, @RequestBody Product product) {
 
 		Product updatedProduct = productRepository.findById(id).map(existingProduct -> {
 
@@ -82,8 +83,12 @@ public class ProductController {
 	}
 
 	@DeleteMapping("/products/{id}")
-	public ResponseEntity<Void> deleteItem(@PathVariable int id) {
+	public ResponseEntity<Void> deleteItem(@PathVariable("id") UUID id) {
 		productRepository.deleteById(id);
+		
+//		if(deleted) 
+//			ResponseEntity.ok("Resource with ID " + id + "deleted successfully.");
+
 	    return ResponseEntity.noContent().build(); // Returns 204 No Content
 	}
 }
