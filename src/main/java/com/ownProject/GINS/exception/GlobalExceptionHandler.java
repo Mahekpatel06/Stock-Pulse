@@ -18,7 +18,6 @@ import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExcep
 @RestControllerAdvice
 public class GlobalExceptionHandler extends ResponseEntityExceptionHandler{
 	
-	
 	@ExceptionHandler(Exception.class)
 	public final ResponseEntity<ExceptionDetails> handleAllException(Exception ex, WebRequest request) throws Exception {
 		ExceptionDetails errorDetails = new ExceptionDetails(LocalDateTime.now(), ex.getMessage(), request.getDescription(false));
@@ -32,6 +31,7 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler{
 		
 		return new ResponseEntity<ExceptionDetails>(errorDetails, HttpStatus.NOT_FOUND);
 	}
+	
 	
 	@Override
 	protected @Nullable ResponseEntity<Object> handleMethodArgumentNotValid(

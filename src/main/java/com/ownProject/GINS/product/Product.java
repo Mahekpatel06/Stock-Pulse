@@ -25,14 +25,14 @@ public class Product {
 	
 	private String category;
 	
-	private int low_stock_threshold;   // the no. that triggers a notification
+	private Integer low_stock_threshold;   // the no. that triggers a notification
 	
 	public Product() {
 		super();
 	}
 	
 	public Product(UUID id, String name, @Min(0) Integer quantity, @Min(0) Double price, String category,
-			int low_stock_threshold) {
+			Integer low_stock_threshold) {
 		super();
 		this.id = id;
 		this.name = name;
@@ -41,7 +41,6 @@ public class Product {
 		this.category = category;
 		this.low_stock_threshold = low_stock_threshold;
 	}
-
 
 	public UUID getId() {
 		return id;
@@ -75,11 +74,11 @@ public class Product {
 		this.category = category;
 	}
 	
-	public int getLow_stock_threshold() {
+	public Integer getLow_stock_threshold() {
 		return low_stock_threshold;
 	}
 	
-	public void setLow_stock_threshold(int low_stock_threshold) {
+	public void setLow_stock_threshold(Integer low_stock_threshold) {
 		this.low_stock_threshold = low_stock_threshold;
 	}
 	

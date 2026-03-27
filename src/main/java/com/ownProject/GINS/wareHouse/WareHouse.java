@@ -1,5 +1,7 @@
 package com.ownProject.GINS.wareHouse;
 
+import java.time.LocalDateTime;
+
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.TimeZoneStorage;
 import org.hibernate.annotations.TimeZoneStorageType;
@@ -24,16 +26,16 @@ public class WareHouse {
 	
 	@CreationTimestamp
 	@TimeZoneStorage(TimeZoneStorageType.AUTO)
-	private String timeZone;
+	private LocalDateTime timeZone;
 	
-	private boolean is_active;
+	private Boolean is_active;
 	
 	public WareHouse() {
 		
 	}
  	
-	public WareHouse(Integer id, String name, String locationCity, String countryCode, String timeZone,
-			boolean is_active) {
+	public WareHouse(Integer id, String name, String locationCity, String countryCode, LocalDateTime timeZone,
+			Boolean is_active) {
 		super();
 		this.id = id;
 		this.name = name;
@@ -67,16 +69,16 @@ public class WareHouse {
 	public void setCountryCode(String countryCode) {
 		this.countryCode = countryCode;
 	}
-	public boolean getIs_active() {
+	public Boolean getIs_active() {
 		return is_active;
 	}
-	public void setIs_active(boolean is_active) {
+	public void setIs_active(Boolean is_active) {
 		this.is_active = is_active;
 	}
-	public String getTimeZone() {
+	public LocalDateTime getTimeZone() {
 		return timeZone;
 	}
-	public void setTimeZone(String timeZone) {
+	public void setTimeZone(LocalDateTime timeZone) {
 		this.timeZone = timeZone;
 	}
 	
