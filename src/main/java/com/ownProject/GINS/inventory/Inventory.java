@@ -2,9 +2,9 @@ package com.ownProject.GINS.inventory;
 
 import java.time.LocalDateTime;
 
-import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.TimeZoneStorage;
 import org.hibernate.annotations.TimeZoneStorageType;
+import org.hibernate.annotations.UpdateTimestamp;
 
 import com.ownProject.GINS.product.Product;
 import com.ownProject.GINS.wareHouse.WareHouse;
@@ -42,7 +42,8 @@ public class Inventory {
 	@Min(0)
 	private Integer quantity;
 	
-	@CreationTimestamp
+//	@CreationTimestamp
+	@UpdateTimestamp
 	@TimeZoneStorage(TimeZoneStorageType.AUTO)
 	private LocalDateTime lastUpdated;
 	
@@ -106,7 +107,6 @@ public class Inventory {
 	public void setWareHouse(WareHouse wareHouse) {
 		this.wareHouse = wareHouse;
 	}
-
 	
 	
 }

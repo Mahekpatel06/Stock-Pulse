@@ -11,8 +11,10 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
@@ -20,14 +22,18 @@ import com.ownProject.GINS.dto.ProductStockDTO;
 import com.ownProject.GINS.dto.WarehouseStockDTO;
 import com.ownProject.GINS.jpa.InventoryRepository;
 
+import jakarta.validation.Valid;
+
 @RestController
 @RequestMapping("/inventory")
 public class InventoryController {
 
 	private InventoryRepository inventoryRepository;
+	private InventoryService inventoryService;
 	
-	public InventoryController(InventoryRepository inventoryRepository) {
+	public InventoryController(InventoryRepository inventoryRepository, InventoryService inventoryService) {
 		this.inventoryRepository = inventoryRepository;
+		this.inventoryService = inventoryService;
 	}
 	
 	@GetMapping
@@ -80,10 +86,10 @@ public class InventoryController {
 		return ResponseEntity.ok(response);
 	}
 	
-	@PostMapping
-	public  ResponseEntity<Inventory> addStock(@RequestBody Inventory inventory) {
+	@PostMapping("/add")
+	public ResponseEntity<Inventory> addStock(@Valid @RequestBody Inventory inventory) {
 		
-		Inventory savedInventory = inventoryRepository.save(inventory);
+		Inventory savedInventory = inventoryService.saveInventory(inventory);
 		
 //		return ResponseEntity.ok(savedInventory);   // 200 ok state
 		
@@ -95,6 +101,25 @@ public class InventoryController {
 //	    return ResponseEntity.created(location).body(savedInventory);
 	    return ResponseEntity.created(location).build();	// 201 created state
 	}
+		
+	@PutMapping("/sell")
+	public ResponseEntity<Inventory> sellproduct(@RequestParam UUID productId, 
+												 @RequestParam Integer warehouseId,
+												 @RequestParam Integer qty) {
+		
+		Inventory sellingProduct = inventoryService.sellProduct(productId, warehouseId, qty);
+		
+		return ResponseEntity.ok(sellingProduct);
+	}
 	
-	
+	@PostMapping("/transfer")
+	public ResponseEntity<String> transferProduct(@RequestParam UUID productId, 
+												  @RequestParam Integer fromWhId, 
+												  @RequestParam Integer toWhId,
+												  @RequestParam Integer qty) {
+		
+		inventoryService.transferProduct(productId, fromWhId, toWhId, qty);
+		
+		return ResponseEntity.ok("Transfer Successful: Moved " + qty + " items.");
+	}
 }
