@@ -16,5 +16,7 @@ public interface InventoryRepository extends JpaRepository<Inventory, Integer> {
 	
 	// Finds all inventory rows for a specific wareohuse ID
 	List<Inventory> findByWareHouse_Id(Integer warehouseId);
+
+	Inventory findByProduct_IdAndWareHouse_Id(UUID productId, Integer warehouseId);
 	
 }

@@ -3,7 +3,6 @@ package com.ownProject.GINS.exception;
 import java.time.LocalDateTime;
 import java.util.NoSuchElementException;
 
-import org.jspecify.annotations.Nullable;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
@@ -34,12 +33,24 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler{
 	
 	
 	@Override
-	protected @Nullable ResponseEntity<Object> handleMethodArgumentNotValid(
-			MethodArgumentNotValidException ex, HttpHeaders headers, HttpStatusCode status, WebRequest request) {
+    protected ResponseEntity<Object> handleMethodArgumentNotValid(
+            MethodArgumentNotValidException ex, 
+            HttpHeaders headers, 
+            HttpStatusCode status, 
+            WebRequest request) {
 
-		ExceptionDetails errorDetails = new ExceptionDetails(LocalDateTime.now(), 
-			"Total Errors:" + ex.getErrorCount() + " First Error:" + ex.getFieldError().getDefaultMessage(), request.getDescription(false));
+        // You can customize the message here to show ALL errors
+        StringBuilder details = new StringBuilder();
+        ex.getBindingResult().getFieldErrors().forEach(error -> 
+            details.append(error.getField()).append(": ").append(error.getDefaultMessage()).append("; ")
+        );
 
-		return new ResponseEntity<>(errorDetails, HttpStatus.BAD_REQUEST);
-	}
+        ExceptionDetails errorDetails = new ExceptionDetails(
+            LocalDateTime.now(), 
+            details.toString(), 
+            request.getDescription(false)
+        );
+
+        return new ResponseEntity<>(errorDetails, HttpStatus.BAD_REQUEST);
+    }
 }
