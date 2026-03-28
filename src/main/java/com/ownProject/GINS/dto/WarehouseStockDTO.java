@@ -6,25 +6,34 @@ import java.util.Map;
 public class WarehouseStockDTO {
 
 	public Integer warehouseId;
+	public String warehouseName;
 	public String location;
 	public List<Map<String, Object>> invetoryItems;	// Simple way to store items
-	
 	
 	public WarehouseStockDTO() {
 		super();
 	}
-	
-	public WarehouseStockDTO(Integer warehouseId, String location, List<Map<String, Object>> invetoryItems) {
+
+	public WarehouseStockDTO(Integer warehouseId, String warehouseName, String location,
+			List<Map<String, Object>> invetoryItems) {
 		super();
 		this.warehouseId = warehouseId;
+		this.warehouseName = warehouseName;
 		this.location = location;
 		this.invetoryItems = invetoryItems;
 	}
+	
 	public Integer getWarehouseId() {
 		return warehouseId;
 	}
 	public void setWarehouseId(Integer warehouseId) {
 		this.warehouseId = warehouseId;
+	}
+	public String getWarehouseName() {
+		return warehouseName;
+	}
+	public void setWarehouseName(String warehouseName) {
+		this.warehouseName = warehouseName;
 	}
 	public String getLocation() {
 		return location;

@@ -65,6 +65,7 @@ public class InventoryController {
 		
 		WarehouseStockDTO response = new WarehouseStockDTO();
 		response.warehouseId = id;
+		response.warehouseName = items.get(0).getWareHouse().getName();
 		response.location = items.get(0).getWareHouse().getLocationCity();	// assuming location field exists
 		
 		response.invetoryItems = items.stream().map(inv -> {
@@ -84,7 +85,7 @@ public class InventoryController {
 		
 		Inventory savedInventory = inventoryRepository.save(inventory);
 		
-//		return ResponseEntity.ok(savedInventory);
+//		return ResponseEntity.ok(savedInventory);   // 200 ok state
 		
 		URI location = ServletUriComponentsBuilder.fromCurrentRequest()
 	            .path("/{id}")
@@ -92,7 +93,7 @@ public class InventoryController {
 	            .toUri();
 	            
 //	    return ResponseEntity.created(location).body(savedInventory);
-	    return ResponseEntity.created(location).build();
+	    return ResponseEntity.created(location).build();	// 201 created state
 	}
 	
 	

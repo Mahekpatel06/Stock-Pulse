@@ -18,9 +18,6 @@ public class Product {
 	private String name;
 	
 	@Min(0)
-	private Integer quantity;
-	
-	@Min(0)
 	private Double price;
 	
 	private String category;
@@ -31,12 +28,11 @@ public class Product {
 		super();
 	}
 	
-	public Product(UUID id, String name, @Min(0) Integer quantity, @Min(0) Double price, String category,
+	public Product(UUID id, String name, @Min(0) Double price, String category,
 			Integer low_stock_threshold) {
 		super();
 		this.id = id;
 		this.name = name;
-		this.quantity = quantity;
 		this.price = price;
 		this.category = category;
 		this.low_stock_threshold = low_stock_threshold;
@@ -53,12 +49,6 @@ public class Product {
 	}
 	public void setName(String name) {
 		this.name = name;
-	}
-	public Integer getQuantity() {
-		return quantity;
-	}
-	public void setQuantity(Integer quantity) {
-		this.quantity = quantity;
 	}
 	public Double getPrice() {
 		return price;
@@ -84,7 +74,7 @@ public class Product {
 	
 	@Override
 	public String toString() {
-		return "Product [id=" + id + ", name=" + name + ", quantity=" + quantity + ", price=" + price + ", category="
+		return "Product [id=" + id + ", name=" + name + ", price=" + price + ", category="
 				+ category + ", low_stock_threshold=" + low_stock_threshold + "]";
 	}
 	

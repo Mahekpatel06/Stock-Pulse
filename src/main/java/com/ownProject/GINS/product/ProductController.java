@@ -74,7 +74,6 @@ public class ProductController {
 		Product updatedProduct = productRepository.findById(id).map(existingProduct -> {
 
 			existingProduct.setName(product.getName());
-			existingProduct.setQuantity(product.getQuantity());
 			existingProduct.setPrice(product.getPrice());
 
 			return productRepository.save(existingProduct);
