@@ -7,14 +7,19 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.ownProject.GINS.jpa.InventoryRepository;
+import com.ownProject.GINS.jpa.NotificationRepository;
 import com.ownProject.GINS.jpa.ProductRepository;
 import com.ownProject.GINS.jpa.WareHouseRepository;
+import com.ownProject.GINS.notification.Notification;
 import com.ownProject.GINS.product.Product;
 import com.ownProject.GINS.wareHouse.WareHouse;
 
 @Service
 public class InventoryService {
 
+	@Autowired
+	private NotificationRepository notificationRepo;
+	
 	@Autowired
 	private InventoryRepository inventoryRepository;
 	
@@ -43,7 +48,7 @@ public class InventoryService {
 		
 //		check for ALERT after selling 
 		if(updatedInv.getQuantity() <= updatedInv.getProduct().getLow_stock_threshold()) {
-			sendLowStockAlert(updatedInv);
+			triggerLowStockAlert(updatedInv);
 		}
 		
 		return updatedInv;
@@ -84,16 +89,31 @@ public class InventoryService {
         Inventory saved = inventoryRepository.save(inventory);
         
         if(saved.getQuantity() <= existingProduct.getLow_stock_threshold()) {
-        	sendLowStockAlert(saved);
+        	triggerLowStockAlert(saved);
         }
         
         return saved;
     }
 
-
-	public void sendLowStockAlert(Inventory inv) {	
-		System.out.println("ALERT: " + inv.getProduct().getName() +
-							" is low in " + inv.getWareHouse().getName() +
-							" (Only " + inv.getQuantity() + " left!)");
+	private void triggerLowStockAlert(Inventory inv) {
+		
+	    Notification alert = new Notification();
+	    
+	    alert.setProduct(inv.getProduct());
+	    alert.setWarehouse(inv.getWareHouse());
+	    
+	    alert.setMessage("LOW STOCK ALERT: " + inv.getProduct().getName() + 
+	                     " in " + inv.getWareHouse().getName() + 
+	                     " is down to " + inv.getQuantity());
+	    
+	    alert.setStatus(0); // 0 = UNREAD/SENT
+	    
+	    notificationRepo.save(alert);
 	}
+	
+//	public void sendLowStockAlert(Inventory inv) {	
+//		System.out.println("ALERT: " + inv.getProduct().getName() +
+//							" is low in " + inv.getWareHouse().getName() +
+//							" (Only " + inv.getQuantity() + " left!)");
+//	}
 }
