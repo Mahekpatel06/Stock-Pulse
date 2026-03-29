@@ -3,6 +3,8 @@ package com.ownProject.GINS.inventory;
 import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.mail.SimpleMailMessage;
+import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -17,6 +19,9 @@ import com.ownProject.GINS.wareHouse.WareHouse;
 @Service
 public class InventoryService {
 
+	@Autowired
+	private JavaMailSender mailSender;
+	
 	@Autowired
 	private NotificationRepository notificationRepo;
 	
@@ -48,6 +53,7 @@ public class InventoryService {
 		
 //		check for ALERT after selling 
 		if(updatedInv.getQuantity() <= updatedInv.getProduct().getLow_stock_threshold()) {
+//			triggerLowStockAlert(updatedInv);
 			triggerLowStockAlert(updatedInv);
 		}
 		
@@ -89,6 +95,7 @@ public class InventoryService {
         Inventory saved = inventoryRepository.save(inventory);
         
         if(saved.getQuantity() <= existingProduct.getLow_stock_threshold()) {
+//        	triggerLowStockAlert(saved);
         	triggerLowStockAlert(saved);
         }
         
@@ -103,17 +110,38 @@ public class InventoryService {
 	    alert.setWarehouse(inv.getWareHouse());
 	    
 	    alert.setMessage("LOW STOCK ALERT: " + inv.getProduct().getName() + 
-	                     " in " + inv.getWareHouse().getName() + 
-	                     " is down to " + inv.getQuantity());
+	    		" in " + inv.getWareHouse().getName() + 
+	    		" is down to " + inv.getQuantity());
 	    
 	    alert.setStatus(0); // 0 = UNREAD/SENT
 	    
 	    notificationRepo.save(alert);
+	    
+	    SimpleMailMessage message = new SimpleMailMessage();
+	    message.setFrom("inventory-system@yourcompany.com");
+	    message.setTo("wahouse-manager@example.com");
+	    message.setSubject("LOW STOCK: " + inv.getProduct().getName());
+	    message.setText("Alert! Only " + inv.getQuantity() + " items left in " + inv.getWareHouse().getName());
+	 
+	    mailSender.send(message);
 	}
 	
 //	public void sendLowStockAlert(Inventory inv) {	
 //		System.out.println("ALERT: " + inv.getProduct().getName() +
 //							" is low in " + inv.getWareHouse().getName() +
 //							" (Only " + inv.getQuantity() + " left!)");
+//	}
+	
+//	public void sendEmailAlert(Inventory inv) {
+//		
+//		String subject = "URGENT: Low Stock for " + inv.getProduct().getName();
+//		String body = "Product " + inv.getProduct().getName() + 
+//						" is low in " + inv.getWareHouse().getName() + 
+//							". Only " + inv.getQuantity() + " left.";
+//		
+//		System.out.println("--- MOCK EMAIL SENT ---");
+//	    System.out.println("Subject: " + subject);
+//	    System.out.println("Body: " + body);
+//	    System.out.println("-----------------------");	
 //	}
 }
