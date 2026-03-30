@@ -1,12 +1,15 @@
 package com.ownProject.GINS.inventory;
 
 import java.net.URI;
+
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -34,6 +37,11 @@ public class InventoryController {
 	public InventoryController(InventoryRepository inventoryRepository, InventoryService inventoryService) {
 		this.inventoryRepository = inventoryRepository;
 		this.inventoryService = inventoryService;
+	}
+	
+	@GetMapping("/pageable")
+	public Page<Inventory> getInventory(Pageable pageable) {
+		return inventoryRepository.findAll(pageable);
 	}
 	
 	@GetMapping
