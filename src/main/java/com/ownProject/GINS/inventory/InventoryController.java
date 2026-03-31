@@ -1,7 +1,6 @@
 package com.ownProject.GINS.inventory;
 
 import java.net.URI;
-
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -110,6 +109,14 @@ public class InventoryController {
 	    return ResponseEntity.created(location).build();	// 201 created state
 	}
 		
+	@PutMapping("/changeQty") 
+	public ResponseEntity<Inventory> changeQty(@Valid @RequestBody Inventory inventory) {
+		
+		inventoryService.updateInventory(inventory);
+		
+		return ResponseEntity.ok().build();
+	}
+	
 	@PutMapping("/sell")
 	public ResponseEntity<Inventory> sellproduct(@RequestParam UUID productId, 
 												 @RequestParam Integer warehouseId,

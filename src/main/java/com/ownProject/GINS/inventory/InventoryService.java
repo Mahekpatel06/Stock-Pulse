@@ -1,6 +1,8 @@
 package com.ownProject.GINS.inventory;
 
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.util.Optional;
 import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,6 +21,8 @@ import com.ownProject.GINS.product.Product;
 import com.ownProject.GINS.transaction.Transaction;
 import com.ownProject.GINS.transaction.Transaction.Type;
 import com.ownProject.GINS.wareHouse.WareHouse;
+
+import jakarta.validation.Valid;
 
 @Service
 public class InventoryService {
@@ -41,9 +45,8 @@ public class InventoryService {
 	@Autowired
 	private WareHouseRepository warehouseRepository;
 
-//	SELL product (reduction)
-	@Transactional
-	public Inventory sellProduct(UUID productId, Integer warehouseId, Integer quantityToSell) {
+//	Calculation for STOCK method - private
+	private Inventory subtractStock(UUID productId, Integer warehouseId, Integer qty) {
 
 		Inventory inv = inventoryRepository.findByProduct_IdAndWareHouse_Id(productId, warehouseId);
 
@@ -51,33 +54,41 @@ public class InventoryService {
 			throw new RuntimeException("Product not found in this warehouse");
 		}
 
-		if (inv.getQuantity() < quantityToSell) {
+		if (inv.getQuantity() < qty) {
 			throw new RuntimeException("Insufficient stock! Only " + inv.getQuantity() + " available.");
 		}
 
-		inv.setQuantity(inv.getQuantity() - quantityToSell);
+		inv.setQuantity(inv.getQuantity() - qty);
 		Inventory updatedInv = inventoryRepository.save(inv);
-
-		String reason = "Customer bought " + quantityToSell + " " + inv.getProduct().getName() + " on "
-				+ inv.getLastUpdated().getDayOfMonth() + "/" + inv.getLastUpdated().getMonthValue() + "/"
-				+ inv.getLastUpdated().getYear();
-		
-		recordTransaction(updatedInv, quantityToSell, Transaction.type, reason);		
 
 //		check for ALERT after selling 
 		if (updatedInv.getQuantity() <= updatedInv.getProduct().getLow_stock_threshold()) {
-//			triggerLowStockAlert(updatedInv);
 			triggerLowStockAlert(updatedInv);
 		}
 
 		return updatedInv;
+
+	}
+
+//	SELL product (reduction)
+	@Transactional
+	public Inventory sellProduct(UUID productId, Integer warehouseId, Integer quantityToSell) {
+
+		Inventory updatedInv = subtractStock(productId, warehouseId, quantityToSell);
+
+		recordTransaction(updatedInv, quantityToSell, Transaction.type,
+				"Customer bought " + quantityToSell + " units of " + updatedInv.getProduct().getName());
+
+		return updatedInv;
+
 	}
 
 //	TRANSFER product
 	@Transactional
 	public void transferProduct(UUID productId, Integer fromWhId, Integer toWhId, Integer qty) {
 
-		sellProduct(productId, fromWhId, qty);
+		Inventory sourceInv = subtractStock(productId, fromWhId, qty);
+		recordTransaction(sourceInv, -qty, Type.TRANSFER, "Transfer out to Warehouse #" + toWhId);
 
 		Inventory destInv = inventoryRepository.findByProduct_IdAndWareHouse_Id(productId, toWhId);
 
@@ -88,31 +99,61 @@ public class InventoryService {
 		destInv.setQuantity((destInv.getQuantity() == null ? 0 : destInv.getQuantity()) + qty);
 
 		inventoryRepository.save(destInv);
+		recordTransaction(destInv, qty, Type.TRANSFER, "Transfer in from Warehouse #" + fromWhId);
+
 	}
 
 	public Inventory saveInventory(Inventory inventory) {
 
-		// 1. Get the REAL Product from DB using the ID provided in JSON
+// Get the REAL Product from DB using the ID provided in JSON
 		Product existingProduct = productRepository.findById(inventory.getProduct().getId())
 				.orElseThrow(() -> new RuntimeException("Product not found"));
 
-		// 2. Get the REAL Warehouse from DB
+// Get the REAL Warehouse from DB
 		WareHouse existingWh = warehouseRepository.findById(inventory.getWareHouse().getId())
 				.orElseThrow(() -> new RuntimeException("Warehouse not found"));
 
-		// 3. Attach the REAL objects to your inventory
-		inventory.setProduct(existingProduct);
-		inventory.setWareHouse(existingWh);
+// CHECK whether this product is existing or not in this warehouse
+		Optional<Inventory> existingInv = Optional.ofNullable(
+				inventoryRepository.findByProduct_IdAndWareHouse_Id(existingProduct.getId(), existingWh.getId()));
 
-		// 4. Now Hibernate knows these aren't "new" or "transient"
+		Inventory inventoryToSave;
+
+		if (existingInv.isPresent()) {
+
+// UPDATE - Get existing record and change quantity
+			inventoryToSave = existingInv.get();
+			inventoryToSave.setQuantity(inventory.getQuantity()); // Overwrite or use += for adding
+		} else {
+
+// NEW - Link product/warehouse and save as new record
+			inventoryToSave = inventory;
+			inventory.setProduct(existingProduct);
+			inventory.setWareHouse(existingWh);
+		}
+
+// Now Hibernate knows these aren't "new" or "transient"
 		Inventory saved = inventoryRepository.save(inventory);
 
 		if (saved.getQuantity() <= existingProduct.getLow_stock_threshold()) {
-//        	triggerLowStockAlert(saved);
 			triggerLowStockAlert(saved);
 		}
 
 		return saved;
+	}
+
+	public void updateInventory(@Valid Inventory inventory) {
+
+		Inventory existingInv = inventoryRepository
+				.findByProduct_IdAndWareHouse_Id(inventory.getProduct().getId(), inventory.getWareHouse().getId());
+				
+		if(existingInv == null) {
+			new RuntimeException("Inventory not found for this product/warehouse");
+		}
+
+		existingInv.setQuantity(inventory.getQuantity()); 
+	
+		inventoryRepository.save(existingInv);
 	}
 
 	private void triggerLowStockAlert(Inventory inv) {
@@ -157,24 +198,25 @@ public class InventoryService {
 //	    System.out.println("-----------------------");	
 //	}
 
-	
 	public void recordTransaction(Inventory inv, Integer qty, Transaction.Type type, String reason) {
-		
+
 // --- AUDIT LOG TRANSACTION - PART
 
 		Transaction record = new Transaction();
 
 		record.setInventory(inv);
 		record.setQtyChange(qty);
-		record.setType(Type.OUTBOUND);
-
 		record.setReason(reason);
+
+		String dateStr = LocalDateTime.now().format(DateTimeFormatter.ofPattern("dd-MM-yyyy"));
+		record.setReason(reason + " on " + dateStr);
 
 		record.setCreatedAt(LocalDateTime.now());
 
 		transactionRepository.save(record);
 
 // ---
-		
+
 	}
+
 }
