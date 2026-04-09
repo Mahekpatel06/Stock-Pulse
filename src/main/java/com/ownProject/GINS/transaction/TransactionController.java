@@ -8,7 +8,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.ownProject.GINS.inventory.Inventory;
 import com.ownProject.GINS.jpa.TransactionRepository;
 
 @RestController
@@ -22,7 +21,7 @@ public class TransactionController {
 		return transactionRepository.findAll();
 	}
 	
-	@GetMapping("/transactions/pageable")
+	@GetMapping("/transactions/pagination")
 	public Page<Transaction> getInventory(Pageable pageable) {
 		return transactionRepository.findAll(pageable);
 	}

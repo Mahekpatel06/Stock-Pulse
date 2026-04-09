@@ -5,7 +5,6 @@ import java.time.format.DateTimeFormatter;
 import java.util.Optional;
 import java.util.UUID;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.stereotype.Service;
@@ -27,24 +26,26 @@ import jakarta.validation.Valid;
 @Service
 public class InventoryService {
 
-	@Autowired
 	private JavaMailSender mailSender;
-
-	@Autowired
 	private TransactionRepository transactionRepository;
-
-	@Autowired
 	private NotificationRepository notificationRepo;
-
-	@Autowired
 	private InventoryRepository inventoryRepository;
-
-	@Autowired
 	private ProductRepository productRepository;
-
-	@Autowired
 	private WareHouseRepository warehouseRepository;
 
+	public InventoryService(JavaMailSender mailSender, TransactionRepository transactionRepository,
+			NotificationRepository notificationRepo, InventoryRepository inventoryRepository,
+			ProductRepository productRepository, WareHouseRepository warehouseRepository) {
+		super();
+		this.mailSender = mailSender;
+		this.transactionRepository = transactionRepository;
+		this.notificationRepo = notificationRepo;
+		this.inventoryRepository = inventoryRepository;
+		this.productRepository = productRepository;
+		this.warehouseRepository = warehouseRepository;
+	}
+
+	
 //	Calculation for STOCK method - private
 	private Inventory subtractStock(UUID productId, Integer warehouseId, Integer qty) {
 
@@ -76,7 +77,7 @@ public class InventoryService {
 
 		Inventory updatedInv = subtractStock(productId, warehouseId, quantityToSell);
 
-		recordTransaction(updatedInv, quantityToSell, Transaction.type,
+		recordTransaction(updatedInv, quantityToSell, Type.OUTBOUND,
 				"Customer bought " + quantityToSell + " units of " + updatedInv.getProduct().getName());
 
 		return updatedInv;
@@ -142,7 +143,7 @@ public class InventoryService {
 		return saved;
 	}
 
-	public void updateInventory(@Valid Inventory inventory) {
+	public Inventory updateInventory(@Valid Inventory inventory) {
 
 		Inventory existingInv = inventoryRepository
 				.findByProduct_IdAndWareHouse_Id(inventory.getProduct().getId(), inventory.getWareHouse().getId());
@@ -154,6 +155,8 @@ public class InventoryService {
 		existingInv.setQuantity(inventory.getQuantity()); 
 	
 		inventoryRepository.save(existingInv);
+		
+		return existingInv;
 	}
 
 	private void triggerLowStockAlert(Inventory inv) {
@@ -173,8 +176,8 @@ public class InventoryService {
 		SimpleMailMessage message = new SimpleMailMessage();
 		message.setFrom("inventory-system@yourcompany.com");
 		message.setTo("wahouse-manager@example.com");
-		message.setSubject("LOW STOCK: " + inv.getProduct().getName());
-		message.setText("Alert! Only " + inv.getQuantity() + " items left in " + inv.getWareHouse().getName());
+		message.setSubject("Stock Pulse");
+		message.setText("LOW STOCK: " + inv.getProduct().getName() + "\n" + "Alert! Only " + inv.getQuantity() + " items left in " + inv.getWareHouse().getName());
 
 		mailSender.send(message);
 	}
@@ -198,7 +201,7 @@ public class InventoryService {
 //	    System.out.println("-----------------------");	
 //	}
 
-	public void recordTransaction(Inventory inv, Integer qty, Transaction.Type type, String reason) {
+	public void recordTransaction(Inventory inv, Integer qty, Type type, String reason) {
 
 // --- AUDIT LOG TRANSACTION - PART
 
@@ -207,7 +210,8 @@ public class InventoryService {
 		record.setInventory(inv);
 		record.setQtyChange(qty);
 		record.setReason(reason);
-
+		record.setType(type);
+		
 		String dateStr = LocalDateTime.now().format(DateTimeFormatter.ofPattern("dd-MM-yyyy"));
 		record.setReason(reason + " on " + dateStr);
 

@@ -29,10 +29,10 @@ public class Transaction {
 	@JoinColumn(name = "inventory_id")
 	private Inventory inventory;
 	
-	public enum Type {INBOUND, OUTBOUND, ADJUSTMENT, TRANSFER};
+	public enum Type {INBOUND, OUTBOUND, ADJUSTMENT, TRANSFER}
 	
 	@Enumerated(EnumType.STRING)
-	public static Type type;
+	public Type type;
 	
 	@NotNull
 	private Integer qtyChange;

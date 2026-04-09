@@ -1,6 +1,7 @@
 package com.ownProject.GINS.inventory;
 
 import java.net.URI;
+
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -23,6 +24,7 @@ import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 import com.ownProject.GINS.dto.ProductStockDTO;
 import com.ownProject.GINS.dto.WarehouseStockDTO;
 import com.ownProject.GINS.jpa.InventoryRepository;
+import com.ownProject.GINS.transaction.Transaction.Type;
 
 import jakarta.validation.Valid;
 
@@ -38,7 +40,7 @@ public class InventoryController {
 		this.inventoryService = inventoryService;
 	}
 	
-	@GetMapping("/pageable")
+	@GetMapping("/pagination")
 	public Page<Inventory> getInventory(Pageable pageable) {
 		return inventoryRepository.findAll(pageable);
 	}
@@ -50,6 +52,7 @@ public class InventoryController {
 	
 	@GetMapping("/products/{id}")
 	public ResponseEntity<ProductStockDTO> getSpecificProduct(@PathVariable UUID id) {
+		
 		List<Inventory> items = inventoryRepository.findByProduct_Id(id);
 		
 		if(items.isEmpty()) return ResponseEntity.notFound().build();
@@ -72,6 +75,7 @@ public class InventoryController {
 	
 	@GetMapping("/warehouses/{id}")
 	public ResponseEntity<WarehouseStockDTO> getSpecificWh(@PathVariable Integer id) {
+		
 		List<Inventory> items = inventoryRepository.findByWareHouse_Id(id);
 		
 		if(items.isEmpty()) return ResponseEntity.notFound().build();
@@ -105,6 +109,9 @@ public class InventoryController {
 	            .buildAndExpand(savedInventory.getId())
 	            .toUri();
 	            
+		inventoryService.recordTransaction(savedInventory, inventory.getQuantity(), Type.INBOUND, 
+								inventory.getProduct().getName() + " newly added in Warehouse #" + inventory.getWareHouse().getName());
+		
 //	    return ResponseEntity.created(location).body(savedInventory);
 	    return ResponseEntity.created(location).build();	// 201 created state
 	}
@@ -112,13 +119,17 @@ public class InventoryController {
 	@PutMapping("/changeQty") 
 	public ResponseEntity<Inventory> changeQty(@Valid @RequestBody Inventory inventory) {
 		
-		inventoryService.updateInventory(inventory);
+		Inventory inv = inventoryService.updateInventory(inventory);
+		
+		inventoryService.recordTransaction(inv, inv.getQuantity(), Type.INBOUND, 
+												inventory.getQuantity() + " " + inventory.getProduct().getName() +
+												" added in Warehouse #" + inventory.getWareHouse().getName());
 		
 		return ResponseEntity.ok().build();
 	}
 	
 	@PutMapping("/sell")
-	public ResponseEntity<Inventory> sellproduct(@RequestParam UUID productId, 
+	public ResponseEntity<Inventory> sellproduct(@RequestParam UUID productId,
 												 @RequestParam Integer warehouseId,
 												 @RequestParam Integer qty) {
 		

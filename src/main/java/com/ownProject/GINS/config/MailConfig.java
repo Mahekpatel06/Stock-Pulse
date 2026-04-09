@@ -17,7 +17,7 @@ public class MailConfig {
         mailSender.setUsername("cf59fd52c8ed60");
         mailSender.setPassword("2469e8b7cc59e8");
         
-        // This satisfies the dependency so your app can start
+// This satisfies the dependency so your app can start
         Properties props = mailSender.getJavaMailProperties();
         props.put("mail.transport.protocol", "smtp");
         props.put("mail.smtp.auth", "true");

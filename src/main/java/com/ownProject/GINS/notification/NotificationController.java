@@ -1,6 +1,9 @@
 package com.ownProject.GINS.notification;
 
 import java.util.List;
+
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -25,6 +28,11 @@ public class NotificationController {
 	@GetMapping
 	public List<Notification> getAllNotifications() {
 		return notificationRepo.findAll();
+	}
+	
+	@GetMapping("/pagination")
+	public Page<Notification> pgNotifi(Pageable pageable) {
+		return notificationRepo.findAll(pageable);
 	}
 	
 	@PutMapping("/{id}/read")
