@@ -15,6 +15,7 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.Version;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
@@ -47,18 +48,21 @@ public class Inventory {
 	@TimeZoneStorage(TimeZoneStorageType.AUTO)
 	private LocalDateTime lastUpdated;
 	
+	@Version
+	private Integer version;
+	
 	public Inventory() {
 		super();
 	}
 
-	public Inventory(Integer id, Product product, WareHouse wareHouse, Integer quantity,
-			LocalDateTime lastUpdated) {
+	public Inventory(Integer id, Product product, WareHouse wareHouse, Integer quantity, LocalDateTime lastUpdated) {
 		super();
 		this.id = id;
 		this.product = product;
 		this.wareHouse = wareHouse;
 		this.quantity = quantity;
 		this.lastUpdated = lastUpdated;
+		this.version = version;
 	}
 
 	public Integer getId() {
@@ -85,11 +89,12 @@ public class Inventory {
 		this.lastUpdated = lastUpdated;
 	}
 	
+	public Integer getVersion() {
+		return version;
+	}
 
-	@Override
-	public String toString() {
-		return "Inventory [id=" + id + ", product=" + product + ", wareHouse=" + wareHouse + ", quantity=" + quantity
-				+ ", lastUpdated=" + lastUpdated + "]";
+	public void setVersion(Integer version) {
+		this.version = version;
 	}
 
 	public Product getProduct() {
@@ -108,5 +113,10 @@ public class Inventory {
 		this.wareHouse = wareHouse;
 	}
 	
+	@Override
+	public String toString() {
+		return "Inventory [id=" + id + ", product=" + product + ", wareHouse=" + wareHouse + ", quantity=" + quantity
+				+ ", lastUpdated=" + lastUpdated + ", version=" + version + "]";
+	}
 	
 }

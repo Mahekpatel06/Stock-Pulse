@@ -2,14 +2,15 @@ package com.ownProject.GINS.inventory;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.Optional;
 import java.util.UUID;
 
+import org.springframework.dao.OptimisticLockingFailureException;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.ownProject.GINS.dto.InventoryDTO;
 import com.ownProject.GINS.jpa.InventoryRepository;
 import com.ownProject.GINS.jpa.NotificationRepository;
 import com.ownProject.GINS.jpa.ProductRepository;
@@ -32,6 +33,7 @@ public class InventoryService {
 	private InventoryRepository inventoryRepository;
 	private ProductRepository productRepository;
 	private WareHouseRepository warehouseRepository;
+//	private InventoryController inventoryController;
 
 	public InventoryService(JavaMailSender mailSender, TransactionRepository transactionRepository,
 			NotificationRepository notificationRepo, InventoryRepository inventoryRepository,
@@ -43,6 +45,7 @@ public class InventoryService {
 		this.inventoryRepository = inventoryRepository;
 		this.productRepository = productRepository;
 		this.warehouseRepository = warehouseRepository;
+//		this.inventoryController = inventoryController;
 	}
 
 	
@@ -104,6 +107,7 @@ public class InventoryService {
 
 	}
 
+	@Transactional
 	public Inventory saveInventory(Inventory inventory) {
 
 // Get the REAL Product from DB using the ID provided in JSON
@@ -113,28 +117,28 @@ public class InventoryService {
 // Get the REAL Warehouse from DB
 		WareHouse existingWh = warehouseRepository.findById(inventory.getWareHouse().getId())
 				.orElseThrow(() -> new RuntimeException("Warehouse not found"));
-
-// CHECK whether this product is existing or not in this warehouse
-		Optional<Inventory> existingInv = Optional.ofNullable(
-				inventoryRepository.findByProduct_IdAndWareHouse_Id(existingProduct.getId(), existingWh.getId()));
+		
+		Inventory existingInv = inventoryRepository.findByProduct_IdAndWareHouse_Id(existingProduct.getId(), existingWh.getId());
 
 		Inventory inventoryToSave;
 
-		if (existingInv.isPresent()) {
+		if (existingInv != null) {
 
 // UPDATE - Get existing record and change quantity
-			inventoryToSave = existingInv.get();
-			inventoryToSave.setQuantity(inventory.getQuantity()); // Overwrite or use += for adding
+			inventoryToSave = existingInv;
+			inventoryToSave.setQuantity(inventory.getQuantity() + inventoryToSave.getQuantity()); 
+			
 		} else {
 
 // NEW - Link product/warehouse and save as new record
-			inventoryToSave = inventory;
-			inventory.setProduct(existingProduct);
-			inventory.setWareHouse(existingWh);
+			inventoryToSave = new Inventory();
+			inventoryToSave.setProduct(existingProduct);
+			inventoryToSave.setWareHouse(existingWh);
+			inventoryToSave.setQuantity(inventory.getQuantity());
 		}
 
 // Now Hibernate knows these aren't "new" or "transient"
-		Inventory saved = inventoryRepository.save(inventory);
+		Inventory saved = inventoryRepository.save(inventoryToSave);
 
 		if (saved.getQuantity() <= existingProduct.getLow_stock_threshold()) {
 			triggerLowStockAlert(saved);
@@ -143,20 +147,28 @@ public class InventoryService {
 		return saved;
 	}
 
-	public Inventory updateInventory(@Valid Inventory inventory) {
+	public InventoryDTO updateInventory(@Valid Inventory inventory) {
 
 		Inventory existingInv = inventoryRepository
 				.findByProduct_IdAndWareHouse_Id(inventory.getProduct().getId(), inventory.getWareHouse().getId());
 				
 		if(existingInv == null) {
-			new RuntimeException("Inventory not found for this product/warehouse");
+			throw new RuntimeException("Inventory not found for this product/warehouse");
 		}
+		
+		if (!existingInv.getVersion().equals(inventory.getVersion())) {
+	        throw new OptimisticLockingFailureException("Version mismatch! Please refresh.");
+	    }
 
 		existingInv.setQuantity(inventory.getQuantity()); 
 	
 		inventoryRepository.save(existingInv);
 		
-		return existingInv;
+		recordTransaction(existingInv, existingInv.getQuantity(), Type.INBOUND, 
+				inventory.getQuantity() + " " + inventory.getProduct().getName() +
+				" added in Warehouse #" + inventory.getWareHouse().getName());
+		
+		return convertToDTO(existingInv);
 	}
 
 	private void triggerLowStockAlert(Inventory inv) {
@@ -221,6 +233,19 @@ public class InventoryService {
 
 // ---
 
+	}
+	
+	public InventoryDTO convertToDTO(Inventory inventory) {
+		
+		InventoryDTO dto = new InventoryDTO();
+		
+		dto.setId(inventory.getId());
+		dto.setQty(inventory.getQuantity());
+		dto.setLastUpdated(inventory.getLastUpdated());
+		dto.setProductName(inventory.getProduct().getName());
+		dto.setWareHouseName(inventory.getWareHouse().getName());
+		
+		return dto;
 	}
 
 }

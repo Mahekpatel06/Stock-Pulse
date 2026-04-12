@@ -1,7 +1,6 @@
 package com.ownProject.GINS.inventory;
 
 import java.net.URI;
-
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -9,7 +8,9 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -21,9 +22,11 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
+import com.ownProject.GINS.dto.InventoryDTO;
 import com.ownProject.GINS.dto.ProductStockDTO;
 import com.ownProject.GINS.dto.WarehouseStockDTO;
 import com.ownProject.GINS.jpa.InventoryRepository;
+import com.ownProject.GINS.specification.InventorySpec;
 import com.ownProject.GINS.transaction.Transaction.Type;
 
 import jakarta.validation.Valid;
@@ -40,16 +43,24 @@ public class InventoryController {
 		this.inventoryService = inventoryService;
 	}
 	
-	@GetMapping("/pagination")
-	public Page<Inventory> getInventory(Pageable pageable) {
-		return inventoryRepository.findAll(pageable);
-	}
-	
 	@GetMapping
 	public List<Inventory> getInv() {
 		return inventoryRepository.findAll();
 	}
 	
+	@GetMapping("/search")
+	public Page<InventoryDTO> searchInventory(@RequestParam(required = false) String category,
+										   @RequestParam(required = false) String warehouseLoc,
+										   @RequestParam(defaultValue = "0") int page,
+										   @RequestParam(defaultValue = "10") int size) {
+
+		Pageable pageable = PageRequest.of(page, size);
+		
+		Specification<Inventory> spec = InventorySpec.withDynamicQuery(category, warehouseLoc);
+		
+		return inventoryRepository.findAll(spec, pageable).map(this::convertToDTO);
+	}
+		
 	@GetMapping("/products/{id}")
 	public ResponseEntity<ProductStockDTO> getSpecificProduct(@PathVariable UUID id) {
 		
@@ -117,13 +128,9 @@ public class InventoryController {
 	}
 		
 	@PutMapping("/changeQty") 
-	public ResponseEntity<Inventory> changeQty(@Valid @RequestBody Inventory inventory) {
+	public ResponseEntity<InventoryDTO> changeQty(@Valid @RequestBody Inventory inventory) {
 		
-		Inventory inv = inventoryService.updateInventory(inventory);
-		
-		inventoryService.recordTransaction(inv, inv.getQuantity(), Type.INBOUND, 
-												inventory.getQuantity() + " " + inventory.getProduct().getName() +
-												" added in Warehouse #" + inventory.getWareHouse().getName());
+		inventoryService.updateInventory(inventory);
 		
 		return ResponseEntity.ok().build();
 	}
@@ -147,5 +154,18 @@ public class InventoryController {
 		inventoryService.transferProduct(productId, fromWhId, toWhId, qty);
 		
 		return ResponseEntity.ok("Transfer Successful: Moved " + qty + " items.");
+	}
+
+	public InventoryDTO convertToDTO(Inventory inventory) {
+		
+		InventoryDTO dto = new InventoryDTO();
+		
+		dto.setId(inventory.getId());
+		dto.setQty(inventory.getQuantity());
+		dto.setLastUpdated(inventory.getLastUpdated());
+		dto.setProductName(inventory.getProduct().getName());
+		dto.setWareHouseName(inventory.getWareHouse().getName());
+		
+		return dto;
 	}
 }
