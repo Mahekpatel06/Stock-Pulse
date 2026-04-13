@@ -11,7 +11,11 @@ import org.springframework.web.bind.annotation.RestController;
 import com.ownProject.GINS.jpa.UserRepository;
 import com.ownProject.GINS.user.User;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
+
 @RestController
+@Tag(name = "Jwt Auth APIs", description = "Endpoints for user authentication and JWT token generation")
 public class JwtAuthController {
 	
 	private JwtTokenService jwtTokenService;
@@ -29,6 +33,7 @@ public class JwtAuthController {
 	}
 
 	@PostMapping("/register")
+	@Operation(summary = "Firstly Do Register into Stock Pulse")
 	public String register(@RequestBody User user) {
 		
 		user.setPassword(passwordEncoder.encode(user.getPassword()));
@@ -44,6 +49,7 @@ public class JwtAuthController {
 	
 	
 	@PostMapping("/login")
+	@Operation(summary = "login into Stock Pulse to explore")
 	public ResponseEntity<JwtTokenResponse> authenticate(@RequestBody User request) {
 		
 		var authentication = authenticationManager.authenticate

@@ -1,4 +1,4 @@
-package com.ownProject.GINS.security;
+	package com.ownProject.GINS.security;
 
 import java.security.interfaces.RSAPrivateKey;
 import java.security.interfaces.RSAPublicKey;
@@ -46,6 +46,7 @@ public class JwtSecurityConfig {
 							.requestMatchers("/inventory/add", 
 											 "/inventory/changeQty",
 											 "/inventory/transfer/**").hasAnyRole("ADMIN", "SELLER")
+							.requestMatchers("/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html", "/docs").permitAll()
 							.anyRequest().authenticated())
 					.httpBasic(Customizer.withDefaults())
 					.sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))

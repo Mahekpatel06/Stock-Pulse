@@ -29,10 +29,13 @@ import com.ownProject.GINS.jpa.InventoryRepository;
 import com.ownProject.GINS.specification.InventorySpec;
 import com.ownProject.GINS.transaction.Transaction.Type;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 
 @RestController
 @RequestMapping("/inventory")
+@Tag(name = "Inventory APIs", description = "Track real-time stock levels, stock-ins, and stock-outs across different warehouses.")
 public class InventoryController {
 
 	private InventoryRepository inventoryRepository;
@@ -44,11 +47,13 @@ public class InventoryController {
 	}
 	
 	@GetMapping
+	@Operation(summary = "get all inventories")
 	public List<Inventory> getInv() {
 		return inventoryRepository.findAll();
 	}
 	
 	@GetMapping("/search")
+	@Operation(summary = "search inv by product category or warehouse location")
 	public Page<InventoryDTO> searchInventory(@RequestParam(required = false) String category,
 										   @RequestParam(required = false) String warehouseLoc,
 										   @RequestParam(defaultValue = "0") int page,
@@ -62,6 +67,7 @@ public class InventoryController {
 	}
 		
 	@GetMapping("/products/{id}")
+	@Operation(summary = "get all warehouses in which this product exists")
 	public ResponseEntity<ProductStockDTO> getSpecificProduct(@PathVariable UUID id) {
 		
 		List<Inventory> items = inventoryRepository.findByProduct_Id(id);
@@ -85,6 +91,7 @@ public class InventoryController {
 	}
 	
 	@GetMapping("/warehouses/{id}")
+	@Operation(summary = "get all products which are present into this warehouse")
 	public ResponseEntity<WarehouseStockDTO> getSpecificWh(@PathVariable Integer id) {
 		
 		List<Inventory> items = inventoryRepository.findByWareHouse_Id(id);
@@ -109,6 +116,7 @@ public class InventoryController {
 	}
 	
 	@PostMapping("/add")
+	@Operation(summary = "add stock")
 	public ResponseEntity<Inventory> addStock(@Valid @RequestBody Inventory inventory) {
 		
 		Inventory savedInventory = inventoryService.saveInventory(inventory);
@@ -128,6 +136,7 @@ public class InventoryController {
 	}
 		
 	@PutMapping("/changeQty") 
+	@Operation(summary = "handle product qty")
 	public ResponseEntity<InventoryDTO> changeQty(@Valid @RequestBody Inventory inventory) {
 		
 		inventoryService.updateInventory(inventory);
@@ -136,6 +145,7 @@ public class InventoryController {
 	}
 	
 	@PutMapping("/sell")
+	@Operation(summary = "to sell the product")
 	public ResponseEntity<Inventory> sellproduct(@RequestParam UUID productId,
 												 @RequestParam Integer warehouseId,
 												 @RequestParam Integer qty) {
@@ -146,6 +156,7 @@ public class InventoryController {
 	}
 	
 	@PostMapping("/transfer")
+	@Operation(summary = "transfer stock from one warehouse to another")
 	public ResponseEntity<String> transferProduct(@RequestParam UUID productId, 
 												  @RequestParam Integer fromWhId, 
 												  @RequestParam Integer toWhId,

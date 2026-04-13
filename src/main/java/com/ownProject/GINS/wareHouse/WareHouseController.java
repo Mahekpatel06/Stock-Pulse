@@ -20,7 +20,11 @@ import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import com.ownProject.GINS.jpa.WareHouseRepository;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
+
 @RestController
+@Tag(name = "Ware_House APIs", description = "Manage physical warehouse locations and capacities")
 public class WareHouseController {
 
 	private WareHouseRepository wareHouseRepository;
@@ -31,12 +35,14 @@ public class WareHouseController {
 	}
 
 	@GetMapping("/warehouses")
+	@Operation(summary = "get all warehouses")
 	public List<WareHouse> knowAllWareHouses() {
 //		return "Here are all the Ware Houses..!!";
 		return wareHouseRepository.findAll();
 	}
 	
 	@GetMapping("/warehouses/{id}")
+	@Operation(summary = "get warehouse by its ID")
 	public EntityModel<WareHouse> getWh(@PathVariable int id) {
 		
 		Optional<WareHouse> wh = wareHouseRepository.findById(id);
@@ -57,6 +63,7 @@ public class WareHouseController {
 	}
 	
 	@PostMapping("/warehouses")
+	@Operation(summary = "add new warehouse")
 	public ResponseEntity<Object> builtNewWareHouse(@RequestBody WareHouse warehouse) {
 		WareHouse builtWh = wareHouseRepository.save(warehouse);
 		
@@ -67,6 +74,7 @@ public class WareHouseController {
 	}
 	
 	@PutMapping("/warehouses/{id}")
+	@Operation(summary = "change details about warehouse")
 	public ResponseEntity<WareHouse> updateWh(@PathVariable int id, @RequestBody WareHouse warehouse) {
 		
 		WareHouse updatedWh = wareHouseRepository.findById(id).map(existingWh -> {

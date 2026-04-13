@@ -55,7 +55,7 @@ public class Inventory {
 		super();
 	}
 
-	public Inventory(Integer id, Product product, WareHouse wareHouse, Integer quantity, LocalDateTime lastUpdated) {
+	public Inventory(Integer id, Product product, WareHouse wareHouse, Integer quantity, LocalDateTime lastUpdated, Integer version) {
 		super();
 		this.id = id;
 		this.product = product;

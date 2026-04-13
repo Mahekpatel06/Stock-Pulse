@@ -1,7 +1,6 @@
 package com.ownProject.GINS.product;
 
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
-
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 
 import java.net.URI;
@@ -23,9 +22,13 @@ import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import com.ownProject.GINS.jpa.ProductRepository;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
+
 //import jakarta.validation.Valid;
 
 @RestController
+@Tag(name = "Product APIs", description = "Manage the product catalog, including adding, updating, and retrieving product details.")
 public class ProductController {
 
 	private ProductRepository productRepository;
@@ -36,11 +39,13 @@ public class ProductController {
 	}
 
 	@GetMapping("/products")
+	@Operation(summary = "get all products")
 	public List<Product> getAllItems() {
 		return productRepository.findAll();
 	}
 
 	@PostMapping("/products")
+	@Operation(summary = "add new product")
 	public ResponseEntity<Object> addItem(@RequestBody Product product) {
 
 		Product savedProduct = productRepository.save(product);
@@ -51,6 +56,7 @@ public class ProductController {
 	}
 
 	@GetMapping("/products/{id}")
+	@Operation(summary = "get product by its ID")
 	public EntityModel<Product> getItem(@PathVariable UUID id) {
 		Optional<Product> product = productRepository.findById(id);
 
@@ -69,6 +75,7 @@ public class ProductController {
 	}
 
 	@PutMapping("/products/{id}")
+	@Operation(summary = "change the price of product")
 	public ResponseEntity<Product> updateItem(@PathVariable UUID id, @RequestBody Product product) {
 
 		Product updatedProduct = productRepository.findById(id).map(existingProduct -> {
@@ -83,6 +90,7 @@ public class ProductController {
 	}
 
 	@DeleteMapping("/products/{id}")
+	@Operation(summary = "to destroy the product(if in-case)")
 	public ResponseEntity<Void> deleteItem(@PathVariable("id") UUID id) {
 		productRepository.deleteById(id);
 		
