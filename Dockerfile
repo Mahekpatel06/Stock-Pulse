@@ -17,14 +17,33 @@
 		
 		
         # We need the JDK (not JRE) for DevTools to work properly
-        FROM eclipse-temurin:21-jdk-alpine
+#        FROM eclipse-temurin:21-jdk-alpine
         
-        WORKDIR /app
+ #       WORKDIR /app
         
         # We don't need to COPY or RUN MVN here because 
         # the Bind Mount will provide the compiled files from Eclipse.
         
-        EXPOSE 8888
+  #      EXPOSE 8888
         
         # This runs the compiled classes directly from the mounted target folder
-        ENTRYPOINT ["java", "-cp", "target/classes:target/dependency/*", "com.ownProject.GINS.GinsApplication"]
+   #     ENTRYPOINT ["java", "-cp", "target/classes:target/dependency/*", "com.ownProject.GINS.GinsApplication"]
+   
+   
+   
+   # Stage 1: Build the application
+   FROM maven:3.9.6-eclipse-temurin-21-alpine AS build
+   WORKDIR /app
+   COPY . .
+   RUN mvn clean package -DskipTests
+
+   # Stage 2: Run the application
+   FROM eclipse-temurin:21-jdk-alpine
+   WORKDIR /app
+   # Copy the built jar from the first stage
+   COPY --from=build /app/target/*.jar app.jar
+
+   EXPOSE 10000
+
+   ENTRYPOINT ["java", "-jar", "app.jar"]
+
