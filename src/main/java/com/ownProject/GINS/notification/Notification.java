@@ -35,7 +35,7 @@ public class Notification {
 	@NotNull
 	private String message;
 	
-	private Integer status;		// 	e.g., SENT, READ	The delivery status of the notification
+	private Integer status;		// 	e.g., SENT(0), READ(1)	The delivery status of the notification
 	
 	@CreationTimestamp
 	@TimeZoneStorage(TimeZoneStorageType.AUTO)

@@ -4,6 +4,7 @@ target/
 src/main/resources/application.properties
 !**/src/main/**/target/
 !**/src/test/**/target/
+*.pem
 
 # Docker data
 mysql_data/
