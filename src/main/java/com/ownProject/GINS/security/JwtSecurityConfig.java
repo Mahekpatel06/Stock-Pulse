@@ -42,6 +42,7 @@ public class JwtSecurityConfig {
 		return http
 					.csrf(customizer -> customizer.disable())
 					.authorizeHttpRequests(request -> request
+							.requestMatchers("/").permitAll()
 							.requestMatchers("/login", "/register").permitAll()
 							.requestMatchers("/inventory/add", 
 											 "/inventory/changeQty",
