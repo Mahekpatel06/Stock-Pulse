@@ -1,5 +1,7 @@
 package com.ownProject.GINS.user;
 
+import com.ownProject.GINS.role.Role;
+
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
@@ -20,20 +22,19 @@ public class User {
 	
 	private String password;
 	
-	public enum Role {ADMIN, SELLER, BUYER}
-	
 	@Enumerated(EnumType.STRING)
 	public Role role;
 
 	public User() {
 		super();
 	}
-	
-	public User(Integer id, String name, String password) {
+
+	public User(Integer id, String name, String password, Role role) {
 		super();
 		this.id = id;
 		this.name = name;
 		this.password = password;
+		this.role = role;
 	}
 
 	public Integer getId() {

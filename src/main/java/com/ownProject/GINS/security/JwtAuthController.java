@@ -8,7 +8,9 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.ownProject.GINS.dto.UserDTO;
 import com.ownProject.GINS.jpa.UserRepository;
+import com.ownProject.GINS.role.Role;
 import com.ownProject.GINS.user.User;
 
 import io.swagger.v3.oas.annotations.Operation;
@@ -34,20 +36,40 @@ public class JwtAuthController {
 
 	@PostMapping("/register")
 	@Operation(summary = "Firstly Do Register into Stock Pulse")
-	public String register(@RequestBody User user) {
-		
-		user.setPassword(passwordEncoder.encode(user.getPassword()));
-		
-		if(user.getRole() == null || user.getRole() == User.Role.ADMIN) {
-			user.setRole(User.Role.BUYER);
-		}
-		
-		userRepository.save(user);
-		
-		return "User registered successfully as " + user.getRole();
+//	public String register(@RequestBody UserDTO user) {
+//		
+//		user.setPassword(passwordEncoder.encode(user.getPassword()));
+//		
+//		if(user.getRole() == null || user.getRole() == user.role.ADMIN) {
+//			user.setRole(user.role.BUYER);
+//		}
+//		
+//		userRepository.save(user);
+//		
+//		return "User registered successfully as " + user.getRole();
+//	}
+	
+	public String register(@RequestBody UserDTO userDTO) {
+	    
+	    // 1. Create a new Entity object
+	    User user = new User();
+	    
+	    Role role = userDTO.getRole();
+
+	    user.setName(userDTO.getName());
+	    user.setPassword(passwordEncoder.encode(userDTO.getPassword()));
+	    
+	    if(role == null || role.equals("ADMIN")) {
+	        user.setRole(user.role.BUYER); 
+	    } else {
+	        user.setRole(role);
+	    }
+	    
+	    // 4. Save the actual Entity
+	    userRepository.save(user);
+	    
+	    return "User registered successfully as " + user.getRole();
 	}
-	
-	
 	@PostMapping("/login")
 	@Operation(summary = "login into Stock Pulse to explore")
 	public ResponseEntity<JwtTokenResponse> authenticate(@RequestBody User request) {
