@@ -108,14 +108,14 @@ public class InventoryService {
 	}
 
 	@Transactional
-	public Inventory saveInventory(Inventory inventory) {
+	public Inventory saveInventory(InventoryDTO inventoryDto) {
 
 // Get the REAL Product from DB using the ID provided in JSON
-		Product existingProduct = productRepository.findById(inventory.getProduct().getId())
+		Product existingProduct = productRepository.findById(inventoryDto.getProductId())
 				.orElseThrow(() -> new RuntimeException("Product not found"));
 
 // Get the REAL Warehouse from DB
-		WareHouse existingWh = warehouseRepository.findById(inventory.getWareHouse().getId())
+		WareHouse existingWh = warehouseRepository.findById(inventoryDto.getWareHouseId())
 				.orElseThrow(() -> new RuntimeException("Warehouse not found"));
 		
 		Inventory existingInv = inventoryRepository.findByProduct_IdAndWareHouse_Id(existingProduct.getId(), existingWh.getId());
@@ -126,7 +126,7 @@ public class InventoryService {
 
 // UPDATE - Get existing record and change quantity
 			inventoryToSave = existingInv;
-			inventoryToSave.setQuantity(inventory.getQuantity() + inventoryToSave.getQuantity()); 
+			inventoryToSave.setQuantity(inventoryDto.getQty() + inventoryToSave.getQuantity()); 
 			
 		} else {
 
@@ -134,7 +134,7 @@ public class InventoryService {
 			inventoryToSave = new Inventory();
 			inventoryToSave.setProduct(existingProduct);
 			inventoryToSave.setWareHouse(existingWh);
-			inventoryToSave.setQuantity(inventory.getQuantity());
+			inventoryToSave.setQuantity(inventoryDto.getQty());
 		}
 
 // Now Hibernate knows these aren't "new" or "transient"
@@ -147,26 +147,26 @@ public class InventoryService {
 		return saved;
 	}
 
-	public InventoryDTO updateInventory(@Valid Inventory inventory) {
+	public InventoryDTO updateInventory(@Valid InventoryDTO inventoryDto) {
 
 		Inventory existingInv = inventoryRepository
-				.findByProduct_IdAndWareHouse_Id(inventory.getProduct().getId(), inventory.getWareHouse().getId());
+				.findByProduct_IdAndWareHouse_Id(inventoryDto.getProductId(), inventoryDto.getWareHouseId());
 				
 		if(existingInv == null) {
 			throw new RuntimeException("Inventory not found for this product/warehouse");
 		}
 		
-		if (!existingInv.getVersion().equals(inventory.getVersion())) {
+		if (!existingInv.getVersion().equals(inventoryDto.getVersion())) {
 	        throw new OptimisticLockingFailureException("Version mismatch! Please refresh.");
 	    }
 
-		existingInv.setQuantity(inventory.getQuantity()); 
+		existingInv.setQuantity(inventoryDto.getQty()); 
 	
 		inventoryRepository.save(existingInv);
 		
 		recordTransaction(existingInv, existingInv.getQuantity(), Type.INBOUND, 
-				inventory.getQuantity() + " " + inventory.getProduct().getName() +
-				" added in Warehouse #" + inventory.getWareHouse().getName());
+				inventoryDto.getQty() + " " + existingInv.getProduct().getName() +
+				" added in Warehouse #" + existingInv.getWareHouse().getName());
 		
 		return convertToDTO(existingInv);
 	}
@@ -239,11 +239,9 @@ public class InventoryService {
 		
 		InventoryDTO dto = new InventoryDTO();
 		
-		dto.setId(inventory.getId());
 		dto.setQty(inventory.getQuantity());
-		dto.setLastUpdated(inventory.getLastUpdated());
-		dto.setProductName(inventory.getProduct().getName());
-		dto.setWareHouseName(inventory.getWareHouse().getName());
+		dto.setProductId(inventory.getProduct().getId());
+		dto.setWareHouseId(inventory.getWareHouse().getId());
 		
 		return dto;
 	}

@@ -1,61 +1,62 @@
 package com.ownProject.GINS.dto;
 
-import java.time.LocalDateTime;
+import java.util.UUID;
 
 public class InventoryDTO {
 
-	private Integer id;
-	private Integer qty;
-	private String productName;
-	private String wareHouseName;
-	private LocalDateTime lastUpdated;
+	public Integer qty;
+	public UUID productId;
+	public Integer wareHouseId;
+	public Integer version;
 	
 	public InventoryDTO() {
 		super();
 	}
 	
-	public InventoryDTO(Integer id, Integer qty, String productName, String wareHouseName, LocalDateTime lastUpdated) {
+	public InventoryDTO(Integer qty, UUID productId, Integer wareHouseId, Integer version) {
 		super();
-		this.id = id;
 		this.qty = qty;
-		this.productName = productName;
-		this.wareHouseName = wareHouseName;
-		this.lastUpdated = lastUpdated;
+		this.productId = productId;
+		this.wareHouseId = wareHouseId;
+		this.version = version;
 	}
-	public Integer getId() {
-		return id;
-	}
-	public void setId(Integer id) {
-		this.id = id;
-	}
+
 	public Integer getQty() {
 		return qty;
 	}
+
 	public void setQty(Integer qty) {
 		this.qty = qty;
 	}
-	public LocalDateTime getLastUpdated() {
-		return lastUpdated;
+
+	public UUID getProductId() {
+		return productId;
 	}
-	public void setLastUpdated(LocalDateTime lastUpdated) {
-		this.lastUpdated = lastUpdated;
+
+	public void setProductId(UUID uuid) {
+		this.productId = uuid;
 	}
-	public String getProductName() {
-		return productName;
+
+	public Integer getWareHouseId() {
+		return wareHouseId;
 	}
-	public void setProductName(String productName) {
-		this.productName = productName;
+
+	public void setWareHouseId(Integer wareHouseId) {
+		this.wareHouseId = wareHouseId;
 	}
-	public String getWareHouseName() {
-		return wareHouseName;
+
+	public Integer getVersion() {
+		return version;
 	}
-	public void setWareHouseName(String wareHouseName) {
-		this.wareHouseName = wareHouseName;
+
+	public void setVersion(Integer version) {
+		this.version = version;
 	}
+
 	@Override
 	public String toString() {
-		return "InventoryDTO [id=" + id + ", qty=" + qty + ", lastUpdated=" + lastUpdated + ", productName="
-				+ productName + ", wareHouseName=" + wareHouseName + "]";
+		return "InventoryDTO [qty=" + qty + ", productId=" + productId + ", wareHouseId=" + wareHouseId + ", version="
+				+ version + "]";
 	}
 	
 }
