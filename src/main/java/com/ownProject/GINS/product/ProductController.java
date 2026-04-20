@@ -20,6 +20,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
+import com.ownProject.GINS.dto.ProductDTO;
 import com.ownProject.GINS.jpa.ProductRepository;
 
 import io.swagger.v3.oas.annotations.Operation;
@@ -46,8 +47,15 @@ public class ProductController {
 
 	@PostMapping("/products")
 	@Operation(summary = "add new product")
-	public ResponseEntity<Object> addItem(@RequestBody Product product) {
+	public ResponseEntity<Object> addItem(@RequestBody ProductDTO productDto) {
 
+		Product product = new Product();
+		
+		product.setName(productDto.getName());
+		product.setPrice(productDto.getPrice());
+		product.setCategory(productDto.getCategory());
+		product.setLow_stock_threshold(productDto.getLow_stock_threshold());
+		
 		Product savedProduct = productRepository.save(product);
 
 		URI Location = ServletUriComponentsBuilder.fromCurrentRequest().path("/{id}")
@@ -76,12 +84,12 @@ public class ProductController {
 
 	@PutMapping("/products/{id}")
 	@Operation(summary = "change the price of product")
-	public ResponseEntity<Product> updateItem(@PathVariable UUID id, @RequestBody Product product) {
+	public ResponseEntity<Product> updateItem(@PathVariable UUID id, @RequestBody ProductDTO productDto) {
 
 		Product updatedProduct = productRepository.findById(id).map(existingProduct -> {
 
-			existingProduct.setName(product.getName());
-			existingProduct.setPrice(product.getPrice());
+			existingProduct.setName(productDto.getName());
+			existingProduct.setPrice(productDto.getPrice());
 
 			return productRepository.save(existingProduct);
 		}).orElseThrow(() -> new NoSuchElementException("Product not found with id " + id));

@@ -117,9 +117,9 @@ public class InventoryController {
 	
 	@PostMapping("/add")
 	@Operation(summary = "add stock")
-	public ResponseEntity<Inventory> addStock(@Valid @RequestBody Inventory inventory) {
+	public ResponseEntity<Inventory> addStock(@Valid @RequestBody InventoryDTO inventoryDto) {
 		
-		Inventory savedInventory = inventoryService.saveInventory(inventory);
+		Inventory savedInventory = inventoryService.saveInventory(inventoryDto);
 		
 //		return ResponseEntity.ok(savedInventory);   // 200 ok state
 		
@@ -128,8 +128,8 @@ public class InventoryController {
 	            .buildAndExpand(savedInventory.getId())
 	            .toUri();
 	            
-		inventoryService.recordTransaction(savedInventory, inventory.getQuantity(), Type.INBOUND, 
-								inventory.getProduct().getName() + " newly added in Warehouse #" + inventory.getWareHouse().getName());
+		inventoryService.recordTransaction(savedInventory, inventoryDto.getQty(), Type.INBOUND, 
+								savedInventory.getProduct().getName() + " newly added in Warehouse #" + savedInventory.getWareHouse().getName());
 		
 //	    return ResponseEntity.created(location).body(savedInventory);
 	    return ResponseEntity.created(location).build();	// 201 created state
@@ -137,9 +137,9 @@ public class InventoryController {
 		
 	@PutMapping("/changeQty") 
 	@Operation(summary = "handle product qty")
-	public ResponseEntity<InventoryDTO> changeQty(@Valid @RequestBody Inventory inventory) {
+	public ResponseEntity<InventoryDTO> changeQty(@Valid @RequestBody InventoryDTO inventoryDto) {
 		
-		inventoryService.updateInventory(inventory);
+		inventoryService.updateInventory(inventoryDto);
 		
 		return ResponseEntity.ok().build();
 	}
@@ -171,11 +171,9 @@ public class InventoryController {
 		
 		InventoryDTO dto = new InventoryDTO();
 		
-		dto.setId(inventory.getId());
 		dto.setQty(inventory.getQuantity());
-		dto.setLastUpdated(inventory.getLastUpdated());
-		dto.setProductName(inventory.getProduct().getName());
-		dto.setWareHouseName(inventory.getWareHouse().getName());
+		dto.setProductId(inventory.getProduct().getId());
+		dto.setWareHouseId(inventory.getWareHouse().getId());
 		
 		return dto;
 	}

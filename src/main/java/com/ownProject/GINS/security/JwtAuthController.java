@@ -35,20 +35,7 @@ public class JwtAuthController {
 	}
 
 	@PostMapping("/register")
-	@Operation(summary = "Firstly Do Register into Stock Pulse")
-//	public String register(@RequestBody UserDTO user) {
-//		
-//		user.setPassword(passwordEncoder.encode(user.getPassword()));
-//		
-//		if(user.getRole() == null || user.getRole() == user.role.ADMIN) {
-//			user.setRole(user.role.BUYER);
-//		}
-//		
-//		userRepository.save(user);
-//		
-//		return "User registered successfully as " + user.getRole();
-//	}
-	
+	@Operation(summary = "First Do Register into Stock Pulse")
 	public String register(@RequestBody UserDTO userDTO) {
 	    
 	    // 1. Create a new Entity object
@@ -65,14 +52,15 @@ public class JwtAuthController {
 	        user.setRole(role);
 	    }
 	    
-	    // 4. Save the actual Entity
 	    userRepository.save(user);
 	    
 	    return "User registered successfully as " + user.getRole();
 	}
+	
+	
 	@PostMapping("/login")
 	@Operation(summary = "login into Stock Pulse to explore")
-	public ResponseEntity<JwtTokenResponse> authenticate(@RequestBody User request) {
+	public ResponseEntity<JwtTokenResponse> authenticate(@RequestBody UserDTO request) {
 		
 		var authentication = authenticationManager.authenticate
 				(new UsernamePasswordAuthenticationToken(request.getName(), request.getPassword()));

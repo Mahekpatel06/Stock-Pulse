@@ -18,6 +18,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
+import com.ownProject.GINS.dto.WareHouseDTO;
 import com.ownProject.GINS.jpa.WareHouseRepository;
 
 import io.swagger.v3.oas.annotations.Operation;
@@ -64,8 +65,15 @@ public class WareHouseController {
 	
 	@PostMapping("/warehouses")
 	@Operation(summary = "add new warehouse")
-	public ResponseEntity<Object> builtNewWareHouse(@RequestBody WareHouse warehouse) {
-		WareHouse builtWh = wareHouseRepository.save(warehouse);
+	public ResponseEntity<Object> builtNewWareHouse(@RequestBody WareHouseDTO warehouseDto) {
+		
+		WareHouse wh = new WareHouse();
+		wh.setName(warehouseDto.getName());
+		wh.setLocationCity(warehouseDto.getLocationCity());
+		wh.setCountryCode(warehouseDto.getCountryCode());
+		wh.setIs_active(warehouseDto.getIs_active());
+		
+		WareHouse builtWh = wareHouseRepository.save(wh);
 		
 		URI Location = ServletUriComponentsBuilder.fromCurrentRequest().path("/{id}")
 				.buildAndExpand(builtWh.getId()).toUri();
@@ -75,14 +83,14 @@ public class WareHouseController {
 	
 	@PutMapping("/warehouses/{id}")
 	@Operation(summary = "change details about warehouse")
-	public ResponseEntity<WareHouse> updateWh(@PathVariable int id, @RequestBody WareHouse warehouse) {
+	public ResponseEntity<WareHouse> updateWh(@PathVariable int id, @RequestBody WareHouseDTO warehouseDto) {
 		
 		WareHouse updatedWh = wareHouseRepository.findById(id).map(existingWh -> {
 
-			existingWh.setName(warehouse.getName());
-			existingWh.setLocationCity(warehouse.getLocationCity());
-			existingWh.setCountryCode(warehouse.getCountryCode());
-			existingWh.setIs_active(warehouse.getIs_active());
+			existingWh.setName(warehouseDto.getName());
+			existingWh.setLocationCity(warehouseDto.getLocationCity());
+			existingWh.setCountryCode(warehouseDto.getCountryCode());
+			existingWh.setIs_active(warehouseDto.getIs_active());
 
 			return wareHouseRepository.save(existingWh);
 		}).orElseThrow(() -> new NoSuchElementException("WareHouse not found with id " + id));
