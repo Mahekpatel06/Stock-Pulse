@@ -14,8 +14,8 @@ public class MailConfig {
         JavaMailSenderImpl mailSender = new JavaMailSenderImpl();
         mailSender.setHost("sandbox.smtp.mailtrap.io");
         mailSender.setPort(2525);
-        mailSender.setUsername("cf59fd52c8ed60");
-        mailSender.setPassword("2469e8b7cc59e8");
+        mailSender.setUsername("f4c9278dc54249");
+        mailSender.setPassword("e9b3b0cd6eaab0");
         
 // This satisfies the dependency so your app can start
         Properties props = mailSender.getJavaMailProperties();
