@@ -25,7 +25,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 
 @RestController
-@Tag(name = "Ware_House APIs", description = "Manage physical warehouse locations and capacities")
+@Tag(name = "Ware_House APIs")
 public class WareHouseController {
 
 	private WareHouseRepository wareHouseRepository;
