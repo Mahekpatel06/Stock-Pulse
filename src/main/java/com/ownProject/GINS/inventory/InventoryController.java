@@ -35,7 +35,7 @@ import jakarta.validation.Valid;
 
 @RestController
 @RequestMapping("/inventory")
-@Tag(name = "Inventory APIs", description = "Track real-time stock levels, stock-ins, and stock-outs across different warehouses.")
+@Tag(name = "Inventory APIs")
 public class InventoryController {
 
 	private InventoryRepository inventoryRepository;
