@@ -93,6 +93,26 @@ https://stock-pulse-q8tw.onrender.com
 
 ---
 
+## 📄 Pagination Support
+
+Pagination is supported in APIs to efficiently handle large datasets.
+
+### 🔹 Example Endpoints
+
+```
+GET /notifications/pagination?page=0&size=5
+GET /transactions/pagination?page=0&size=10
+```
+
+### 🔸 Parameters
+
+* `page` → Page number (starts from 0)
+* `size` → Number of records per page
+
+👉 This helps in optimizing performance and improves API response handling for large data.
+
+---
+
 #### ▶️ Quick Start: Test JWT APIs
 
 Use the following request body for both **Register** and **Login** APIs:
