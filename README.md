@@ -49,12 +49,6 @@ This project solves the problem of **manual inventory tracking and delayed stock
 * Search inventory by product category or warehouse location
 * View all products in a warehouse, or all warehouses holding a product
 
-### 🔔 Low-Stock Notification System
-
-* Low stock alerts (email triggered)
-* Mark notifications as read
-* Pagination support
-
 ### 💰 Transactions
 
 * Track all stock movements
@@ -99,10 +93,41 @@ https://stock-pulse-q8tw.onrender.com
 
 ---
 
-##🚦 Quick Start (Auth Example)
-* Before calling any API, you must register and login to get your JWT token.
-* Step 1 — Register : 
+#### ▶️ Quick Start: Test JWT APIs
 
+Use the following request body for both **Register** and **Login** APIs:
+
+```json
+{
+  "name": "yourname",
+  "password": "yourpassword",
+  "role": "SELLER"
+}
+```
+
+**Step 1: Register User**
+
+```
+POST /register
+```
+
+**Step 2: Login to Get JWT Token**
+
+```
+POST /login
+```
+
+👉 The login response will return a **JWT token**.
+
+**Step 3: Use Token in Swagger / APIs**
+
+Add the token in the Authorize header:
+
+```
+Authorization: <your_token>
+```
+
+Now you can access secured APIs based on your role.
 
 ---
 
