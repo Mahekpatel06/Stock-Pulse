@@ -17,7 +17,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 
 @RestController
-@Tag(name = "Jwt Auth APIs", description = "Endpoints for user authentication and JWT token generation")
+@Tag(name = "Jwt Auth APIs")
 public class JwtAuthController {
 	
 	private JwtTokenService jwtTokenService;

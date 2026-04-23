@@ -28,17 +28,21 @@ public class SwaggerConfig {
 						  .contact(new Contact().name("Mahek").email("mahekptl09@gmail.com"))
 						  .license(new License().name("Apache 2.0").url("http://springdoc.org"))
 				)
-//				.servers(List.of(new Server().url("http://localhost:8888").description("local"),
-//						new Server().url("http://localhost:8080").description("live")))
 				.tags(List.of(
-						new  Tag().name("Jwt Auth APIs"),
-						new Tag().name("Product APIs"),
-						new Tag().name("Ware_House APIs"),
-						new Tag().name("Inventory APIs"),
-						new Tag().name("Notification APIs"),
-						new Tag().name("Transaction APIs")
-						)
-					 )
+					new Tag().name("Jwt Auth APIs")
+                        .description("Endpoints for user authentication and JWT token generation"),
+                    new Tag().name("Product APIs")
+                        .description("Manage the product catalog, including adding, updating, and retrieving product details."),
+                    new Tag().name("Ware_House APIs")
+                        .description("Manage physical warehouse locations and capacities"),
+                    new Tag().name("Inventory APIs")
+                        .description("Track real-time stock levels, stock-ins, and stock-outs across different warehouses."),
+                    new Tag().name("Notification APIs")
+                        .description("Manage system alerts, low-stock warnings, and user communication logs."),
+                    new Tag().name("Transaction APIs")
+                        .description("Audit trail for all financial and stock movements within the Stock Pulse system.")
+					)
+				)
 				.addSecurityItem(new SecurityRequirement().addList("bearerAuth")) // Global security requirement
 	            .components(new Components()
 	                .addSecuritySchemes("bearerAuth", 

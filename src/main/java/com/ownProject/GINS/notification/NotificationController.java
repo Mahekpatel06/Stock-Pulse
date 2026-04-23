@@ -18,7 +18,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 
 @RestController
 @RequestMapping("/notifications")
-@Tag(name = "Notification APIs", description = "Manage system alerts, low-stock warnings, and user communication logs.")
+@Tag(name = "Notification APIs")
 public class NotificationController {
 
 	private NotificationRepository notificationRepo;

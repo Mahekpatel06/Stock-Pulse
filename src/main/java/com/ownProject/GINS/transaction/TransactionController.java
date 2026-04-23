@@ -14,7 +14,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 
 @RestController
-@Tag(name = "Transaction APIs", description = "Audit trail for all financial and stock movements within the Stock Pulse system.")
+@Tag(name = "Transaction APIs")
 public class TransactionController {
 	
 	@Autowired

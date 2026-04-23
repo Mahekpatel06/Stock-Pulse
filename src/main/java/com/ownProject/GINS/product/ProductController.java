@@ -29,7 +29,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 //import jakarta.validation.Valid;
 
 @RestController
-@Tag(name = "Product APIs", description = "Manage the product catalog, including adding, updating, and retrieving product details.")
+@Tag(name = "Product APIs")
 public class ProductController {
 
 	private ProductRepository productRepository;
