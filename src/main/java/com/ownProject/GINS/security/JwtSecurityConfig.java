@@ -43,6 +43,7 @@ public class JwtSecurityConfig {
 					.csrf(customizer -> customizer.disable())
 					.authorizeHttpRequests(request -> request
 							.requestMatchers("/").permitAll()
+							.requestMatchers("/actuator/prometheus").permitAll() 
 							.requestMatchers("/login", "/register").permitAll()
 							.requestMatchers("/inventory/add", 
 											 "/inventory/changeQty",
