@@ -7,6 +7,8 @@
         <http>
             <!-- Replace with your local machine's IP so Render can reach it -->
             <url>https://animation-race-king.ngrok-free.dev/loki/api/v1/push</url>
+            <connectionTimeoutMs>60000</connectionTimeoutMs> 
+            <requestTimeoutMs>15000</requestTimeoutMs>
         </http>
         <format>
             <label>
