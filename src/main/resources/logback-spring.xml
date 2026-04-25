@@ -9,6 +9,8 @@
             <url>https://animation-race-king.ngrok-free.dev/loki/api/v1/push</url>
             <connectionTimeoutMs>60000</connectionTimeoutMs> 
             <requestTimeoutMs>15000</requestTimeoutMs>
+            <batchMaxItems>1</batchMaxItems>
+            <batchTimeoutMs>500</batchTimeoutMs>
         </http>
         <format>
             <label>
