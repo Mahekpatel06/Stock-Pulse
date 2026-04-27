@@ -26,4 +26,16 @@
         <appender-ref ref="CONSOLE" />
         <appender-ref ref="LOKI" />
     </root>
+    
+    <!-- Specifically send Security DEBUG logs to Loki -->
+    <logger name="org.springframework.security" level="DEBUG" additivity="false">
+        <appender-ref ref="CONSOLE" />
+        <appender-ref ref="LOKI" />
+    </logger>
+    
+    <!-- Specifically send Web/API logs to Loki -->
+    <logger name="org.springframework.web" level="DEBUG" additivity="false">
+        <appender-ref ref="LOKI" />
+    </logger>
+
 </configuration>
