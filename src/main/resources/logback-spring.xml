@@ -17,7 +17,7 @@
                 <pattern>app=Stock-Pulse,host=${HOSTNAME},level=%level</pattern>
             </label>
             <message>
-                <pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %replace(%msg){"(Authorization: Bearer |Bearer )[a-zA-Z0-9\-_]+\.[a-zA-Z0-9\-_]+\.[a-zA-Z0-9\-_]+", "$1******"}%n</pattern>
+                <pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %replace(%msg){"(Authorization: Bearer |Bearer )[a-zA-Z0-9\-_]+\.[a-zA-Z0-9\-_]+\.[a-zA-Z0-9\-_]+|(\"password\"\s*[:=]\s*)\"[^\"]+\"|(\bpassword=)[^&amp;\s,]+", "$1$2$3******"}%n</pattern>
             </message>
         </format>
     </appender>
