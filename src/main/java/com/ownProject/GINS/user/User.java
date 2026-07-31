@@ -23,7 +23,7 @@ public class User {
 	private String password;
 	
 	@Enumerated(EnumType.STRING)
-	public Role role;
+	private Role role;
 
 	public User() {
 		super();

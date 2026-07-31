@@ -97,7 +97,13 @@ public class InventoryService {
 		Inventory destInv = inventoryRepository.findByProduct_IdAndWareHouse_Id(productId, toWhId);
 
 		if (destInv == null) {
-			new Inventory();
+			destInv = new Inventory();
+			destInv.setProduct(productRepository.findById(productId)
+								.orElseThrow(() -> new RuntimeException("Product not found")));
+    		destInv.setWareHouse(warehouseRepository.findById(toWhId)
+								.orElseThrow(() -> new RuntimeException("Warehouse not found")));
+    		destInv.setQuantity(0);
+
 		}
 
 		destInv.setQuantity((destInv.getQuantity() == null ? 0 : destInv.getQuantity()) + qty);

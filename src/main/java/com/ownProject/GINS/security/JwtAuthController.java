@@ -46,7 +46,7 @@ public class JwtAuthController {
 	    user.setName(userDTO.getName());
 	    user.setPassword(passwordEncoder.encode(userDTO.getPassword()));
 	    
-	    if(role == null || role.equals("ADMIN")) {
+	    if(role == null || role == Role.ADMIN) {
 	        user.setRole(user.role.BUYER); 
 	    } else {
 	        user.setRole(role);
