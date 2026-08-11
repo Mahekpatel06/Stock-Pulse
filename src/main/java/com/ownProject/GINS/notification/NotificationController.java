@@ -22,29 +22,35 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 public class NotificationController {
 
 	private NotificationRepository notificationRepo;
+	private NotificationService notificService;
 
-	public NotificationController(NotificationRepository notificationRepo) {
+
+	public NotificationController(NotificationRepository notificationRepo, NotificationService notificService) {
 		super();
 		this.notificationRepo = notificationRepo;
+		this.notificService = notificService;
 	}
 	
 	
 	@GetMapping
 	@Operation(summary = "get all notifications")
 	public List<Notification> getAllNotifications() {
-		return notificationRepo.findAll();
+
+		return notificService.getAllNotfic();
 	}
 	
 	@GetMapping("/pagination")
 	@Operation(summary = "get notifications in diff pages acc. to your choice")
 	public Page<Notification> pgNotifi(Pageable pageable) {
-		return notificationRepo.findAll(pageable);
+
+		return notificService.pgtionNotific(pageable);
 	}
 	
 	@PutMapping("/{id}/read")
 	@Operation(summary = "do mark as read to notification")
 	public ResponseEntity<Notification> markAsRead(@PathVariable Integer id) {
-		
+
+		notificService.markNotificAsRead(id);
 		Notification note = notificationRepo.findById(id)
 				.orElseThrow( () -> new RuntimeException("Notification not Found"));
 		

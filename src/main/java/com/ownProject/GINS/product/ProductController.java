@@ -32,79 +32,45 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 @Tag(name = "Product APIs")
 public class ProductController {
 
-	private ProductRepository productRepository;
+	private ProductService productService;
 
-	public ProductController(ProductRepository productRepository) {
+	public ProductController(ProductService productService) {
 		super();
-		this.productRepository = productRepository;
+		this.productService = productService;
 	}
 
 	@GetMapping("/products")
 	@Operation(summary = "get all products")
 	public List<Product> getAllItems() {
-		return productRepository.findAll();
+
+		return productService.findallItems();
 	}
 
 	@PostMapping("/products")
 	@Operation(summary = "add new product")
 	public ResponseEntity<Object> addItem(@RequestBody ProductDTO productDto) {
 
-		Product product = new Product();
-		
-		product.setName(productDto.getName());
-		product.setPrice(productDto.getPrice());
-		product.setCategory(productDto.getCategory());
-		product.setLow_stock_threshold(productDto.getLow_stock_threshold());
-		
-		Product savedProduct = productRepository.save(product);
-
-		URI Location = ServletUriComponentsBuilder.fromCurrentRequest().path("/{id}")
-				.buildAndExpand(savedProduct.getId()).toUri();
-		return ResponseEntity.created(Location).build();
+		return productService.addProduct(productDto);
 	}
 
 	@GetMapping("/products/{id}")
 	@Operation(summary = "get product by its ID")
 	public EntityModel<Product> getItem(@PathVariable UUID id) {
-		Optional<Product> product = productRepository.findById(id);
 
-		if (product.isEmpty()) {
-			throw new NoSuchElementException("Product doesn't exist with id:" + id);
-		}
-		
-		EntityModel<Product> entityModel = EntityModel.of(product.get());
-//		WebMvcLinkBuilder link = linkTo(methodOn(this.getClass()).getAllItems());
-//		entityModel.add(link.withRel("all-products"));
-		entityModel.add(linkTo(methodOn(this.getClass()).getAllItems()).withRel("all-products"));
-		entityModel.add(linkTo(methodOn(this.getClass()).getItem(id)).withSelfRel());
-		entityModel.add(linkTo(methodOn(this.getClass()).updateItem(id, null)).withRel("update"));
-		entityModel.add(linkTo(methodOn(this.getClass()).deleteItem(id)).withRel("delete"));
-		return entityModel;
+		return productService.getProWithId(id);
 	}
 
 	@PutMapping("/products/{id}")
 	@Operation(summary = "change the price of product")
 	public ResponseEntity<Product> updateItem(@PathVariable UUID id, @RequestBody ProductDTO productDto) {
 
-		Product updatedProduct = productRepository.findById(id).map(existingProduct -> {
-
-			existingProduct.setName(productDto.getName());
-			existingProduct.setPrice(productDto.getPrice());
-
-			return productRepository.save(existingProduct);
-		}).orElseThrow(() -> new NoSuchElementException("Product not found with id " + id));
-		
-		return ResponseEntity.ok(updatedProduct); // Wrap in ResponseEntity
+		return productService.updateProd(id, productDto);
 	}
 
 	@DeleteMapping("/products/{id}")
 	@Operation(summary = "to destroy the product(if in-case)")
 	public ResponseEntity<Void> deleteItem(@PathVariable("id") UUID id) {
-		productRepository.deleteById(id);
 		
-//		if(deleted) 
-//			ResponseEntity.ok("Resource with ID " + id + "deleted successfully.");
-
-	    return ResponseEntity.noContent().build(); // Returns 204 No Content
+		return productService.deleteProd(id);
 	}
 }
