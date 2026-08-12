@@ -1,11 +1,10 @@
-package com.ownProject.GINS;
+package com.ownProject.GINS.inventory;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 import java.util.UUID;
 
-import com.ownProject.GINS.inventory.InventoryService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -15,7 +14,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 
-import com.ownProject.GINS.inventory.Inventory;
 import com.ownProject.GINS.jpa.InventoryRepository;
 import com.ownProject.GINS.jpa.NotificationRepository;
 import com.ownProject.GINS.jpa.TransactionRepository;
