@@ -13,6 +13,10 @@ public class UserDTO {
 	@Enumerated(EnumType.STRING)
 	public Role role;
 	
+	public UserDTO() {
+		super();
+	}
+
 	public UserDTO(String name, String password, Role role) {
 		super();
 		this.name = name;
