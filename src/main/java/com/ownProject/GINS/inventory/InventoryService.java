@@ -52,7 +52,7 @@ public class InventoryService {
 //	Calculation for STOCK method - private
 	private Inventory subtractStock(UUID productId, Integer warehouseId, Integer qty) {
 
-		Inventory inv = inventoryRepository.findByProduct_IdAndWareHouse_Id(productId, warehouseId);
+		Inventory inv = inventoryRepository.findByProduct_IdAndWareHouse_IdWithLock(productId, warehouseId);
 
 		if (inv == null) {
 			throw new RuntimeException("Product not found in this warehouse");
@@ -94,7 +94,7 @@ public class InventoryService {
 		Inventory sourceInv = subtractStock(productId, fromWhId, qty);
 		recordTransaction(sourceInv, -qty, Type.TRANSFER, "Transfer out to Warehouse #" + toWhId);
 
-		Inventory destInv = inventoryRepository.findByProduct_IdAndWareHouse_Id(productId, toWhId);
+		Inventory destInv = inventoryRepository.findByProduct_IdAndWareHouse_IdWithLock(productId, toWhId);
 
 		if (destInv == null) {
 			destInv = new Inventory();

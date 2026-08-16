@@ -2,12 +2,16 @@ package com.ownProject.GINS.jpa;
 import java.util.List;
 import java.util.UUID;
 
+import jakarta.persistence.LockModeType;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 
 import com.ownProject.GINS.inventory.Inventory;
 
 import jakarta.transaction.Transactional;
+import org.springframework.data.jpa.repository.Lock;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
 @Transactional
 public interface InventoryRepository extends JpaRepository<Inventory, Integer>, JpaSpecificationExecutor<Inventory>{
@@ -20,4 +24,9 @@ public interface InventoryRepository extends JpaRepository<Inventory, Integer>, 
 
 	Inventory findByProduct_IdAndWareHouse_Id(UUID productId, Integer warehouseId);
 
+	@Lock(LockModeType.PESSIMISTIC_WRITE)
+	@Query("SELECT i FROM Inventory i WHERE i.product.id = :productId AND i.wareHouse.id = :warehouseId")
+	Inventory findByProduct_IdAndWareHouse_IdWithLock(
+			@Param("productId") UUID productId,
+			@Param("warehouseId") Integer warehouseId);
 }

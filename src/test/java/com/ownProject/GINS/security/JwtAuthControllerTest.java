@@ -30,7 +30,6 @@ class JwtAuthControllerTest {
     // Test Case 1: Registering a standard user (defaults to BUYER if role is null)
     @Test
     void register_DefaultRoleToBuyer() {
-        // Arrange
         UserDTO dto = new UserDTO();
         dto.setName("john_doe");
         dto.setPassword("pass123");
