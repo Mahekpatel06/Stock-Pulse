@@ -3,6 +3,8 @@ package com.ownProject.GINS.exception;
 import java.time.LocalDateTime;
 import java.util.NoSuchElementException;
 
+import com.ownProject.GINS.exception.customExpClasses.InsufficientStockException;
+import com.ownProject.GINS.exception.customExpClasses.ResourceNotFoundException;
 import org.springframework.dao.OptimisticLockingFailureException;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -32,8 +34,7 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler{
 		
 		return new ResponseEntity<ExceptionDetails>(errorDetails, HttpStatus.NOT_FOUND);
 	}
-	
-	
+
 	@Override
     protected ResponseEntity<Object> handleMethodArgumentNotValid(
             MethodArgumentNotValidException ex, 
@@ -70,4 +71,27 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler{
 	    return ResponseEntity.badRequest().body("Validation Error: " + ex.getMessage());
 	}
 
+	@ExceptionHandler(ResourceNotFoundException.class)
+	public final ResponseEntity<ExceptionDetails> handleResourceNotFoundExp(
+			ResourceNotFoundException ex, WebRequest request) {
+
+		ExceptionDetails errorDetails = new ExceptionDetails(LocalDateTime.now(),
+				ex.getMessage(),
+				request.getDescription(false)
+		);
+
+		return new ResponseEntity<>(errorDetails, HttpStatus.NOT_FOUND);
+	}
+
+	@ExceptionHandler(InsufficientStockException.class)
+	public final ResponseEntity<ExceptionDetails> handleInsufficientStockExp (
+			InsufficientStockException ex, WebRequest request) {
+
+		ExceptionDetails errorDetails = new ExceptionDetails(LocalDateTime.now(),
+				ex.getMessage(),
+				request.getDescription(false)
+		);
+
+		return new ResponseEntity<>(errorDetails, HttpStatus.BAD_REQUEST);
+	}
 }

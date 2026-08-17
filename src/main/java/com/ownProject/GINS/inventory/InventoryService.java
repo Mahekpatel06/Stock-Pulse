@@ -4,6 +4,8 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.UUID;
 
+import com.ownProject.GINS.exception.customExpClasses.InsufficientStockException;
+import com.ownProject.GINS.exception.customExpClasses.ResourceNotFoundException;
 import org.springframework.dao.OptimisticLockingFailureException;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
@@ -55,11 +57,11 @@ public class InventoryService {
 		Inventory inv = inventoryRepository.findByProduct_IdAndWareHouse_IdWithLock(productId, warehouseId);
 
 		if (inv == null) {
-			throw new RuntimeException("Product not found in this warehouse");
+			throw new ResourceNotFoundException("Product not found in this warehouse");
 		}
 
 		if (inv.getQuantity() < qty) {
-			throw new RuntimeException("Insufficient stock! Only " + inv.getQuantity() + " available.");
+			throw new InsufficientStockException("Insufficient stock! Only " + inv.getQuantity() + " available.");
 		}
 
 		inv.setQuantity(inv.getQuantity() - qty);
@@ -99,9 +101,9 @@ public class InventoryService {
 		if (destInv == null) {
 			destInv = new Inventory();
 			destInv.setProduct(productRepository.findById(productId)
-								.orElseThrow(() -> new RuntimeException("Product not found")));
+								.orElseThrow(() -> new ResourceNotFoundException("Product not found")));
     		destInv.setWareHouse(warehouseRepository.findById(toWhId)
-								.orElseThrow(() -> new RuntimeException("Warehouse not found")));
+								.orElseThrow(() -> new ResourceNotFoundException("Warehouse not found")));
     		destInv.setQuantity(0);
 
 		}
@@ -118,11 +120,11 @@ public class InventoryService {
 
 // Get the REAL Product from DB using the ID provided in JSON
 		Product existingProduct = productRepository.findById(inventoryDto.getProductId())
-				.orElseThrow(() -> new RuntimeException("Product not found"));
+				.orElseThrow(() -> new ResourceNotFoundException("Product not found"));
 
 // Get the REAL Warehouse from DB
 		WareHouse existingWh = warehouseRepository.findById(inventoryDto.getWareHouseId())
-				.orElseThrow(() -> new RuntimeException("Warehouse not found"));
+				.orElseThrow(() -> new ResourceNotFoundException("Warehouse not found"));
 		
 		Inventory existingInv = inventoryRepository.findByProduct_IdAndWareHouse_Id(existingProduct.getId(), existingWh.getId());
 
@@ -159,7 +161,7 @@ public class InventoryService {
 				.findByProduct_IdAndWareHouse_Id(inventoryDto.getProductId(), inventoryDto.getWareHouseId());
 				
 		if(existingInv == null) {
-			throw new RuntimeException("Inventory not found for this product/warehouse");
+			throw new ResourceNotFoundException("Inventory not found for this product/warehouse");
 		}
 		
 		if (!existingInv.getVersion().equals(inventoryDto.getVersion())) {
