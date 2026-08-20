@@ -1,5 +1,6 @@
 package com.ownProject.GINS.product;
 
+import java.io.Serializable;
 import java.util.UUID;
 
 import jakarta.persistence.Entity;
@@ -9,7 +10,7 @@ import jakarta.persistence.Id;
 import jakarta.validation.constraints.Min;
 
 @Entity
-public class Product {
+public class Product implements java.io.Serializable {
 	
 	@Id
 	@GeneratedValue(strategy = GenerationType.UUID)

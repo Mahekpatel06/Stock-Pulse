@@ -29,13 +29,12 @@ import jakarta.validation.Valid;
 @Service
 public class InventoryService {
 
-	private JavaMailSender mailSender;
-	private TransactionRepository transactionRepository;
-	private NotificationRepository notificationRepo;
-	private InventoryRepository inventoryRepository;
-	private ProductRepository productRepository;
-	private WareHouseRepository warehouseRepository;
-//	private InventoryController inventoryController;
+	private final JavaMailSender mailSender;
+	private final TransactionRepository transactionRepository;
+	private final NotificationRepository notificationRepo;
+	private final InventoryRepository inventoryRepository;
+	private final ProductRepository productRepository;
+	private final WareHouseRepository warehouseRepository;
 
 	public InventoryService(JavaMailSender mailSender, TransactionRepository transactionRepository,
 			NotificationRepository notificationRepo, InventoryRepository inventoryRepository,
@@ -47,7 +46,6 @@ public class InventoryService {
 		this.inventoryRepository = inventoryRepository;
 		this.productRepository = productRepository;
 		this.warehouseRepository = warehouseRepository;
-//		this.inventoryController = inventoryController;
 	}
 
 	

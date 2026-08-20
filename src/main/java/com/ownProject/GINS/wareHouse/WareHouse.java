@@ -2,6 +2,7 @@ package com.ownProject.GINS.wareHouse;
 
 import java.time.LocalDateTime;
 
+import java.io.Serializable;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.TimeZoneStorage;
 import org.hibernate.annotations.TimeZoneStorageType;
@@ -12,7 +13,7 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 
 @Entity
-public class WareHouse {
+public class WareHouse implements Serializable {
 	
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -31,7 +32,7 @@ public class WareHouse {
 	private Boolean is_active;
 	
 	public WareHouse() {
-		
+		super();
 	}
  	
 	public WareHouse(Integer id, String name, String locationCity, String countryCode, LocalDateTime timeZone,

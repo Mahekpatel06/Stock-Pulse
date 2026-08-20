@@ -5,8 +5,6 @@ import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 
 import java.net.URI;
 import java.util.List;
-import java.util.NoSuchElementException;
-import java.util.Optional;
 import java.util.UUID;
 
 import org.springframework.hateoas.EntityModel;
@@ -21,56 +19,60 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import com.ownProject.GINS.dto.ProductDTO;
-import com.ownProject.GINS.jpa.ProductRepository;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
-
-//import jakarta.validation.Valid;
 
 @RestController
 @Tag(name = "Product APIs")
 public class ProductController {
 
-	private ProductService productService;
+	private final ProductService productService;
 
 	public ProductController(ProductService productService) {
-		super();
 		this.productService = productService;
 	}
 
 	@GetMapping("/products")
 	@Operation(summary = "get all products")
 	public List<Product> getAllItems() {
-
 		return productService.findallItems();
 	}
 
 	@PostMapping("/products")
 	@Operation(summary = "add new product")
 	public ResponseEntity<Object> addItem(@RequestBody ProductDTO productDto) {
-
-		return productService.addProduct(productDto);
+		Product savedProduct = productService.addProduct(productDto);
+		URI location = ServletUriComponentsBuilder.fromCurrentRequest().path("/{id}")
+				.buildAndExpand(savedProduct.getId()).toUri();
+		return ResponseEntity.created(location).build();
 	}
 
 	@GetMapping("/products/{id}")
 	@Operation(summary = "get product by its ID")
 	public EntityModel<Product> getItem(@PathVariable UUID id) {
+		Product product = productService.getProWithId(id);
+		
+		EntityModel<Product> entityModel = EntityModel.of(product);
+		entityModel.add(linkTo(methodOn(ProductController.class).getAllItems()).withRel("all-products"));
+		entityModel.add(linkTo(methodOn(ProductController.class).getItem(id)).withSelfRel());
+		entityModel.add(linkTo(methodOn(ProductController.class).updateItem(id, null)).withRel("update"));
+		entityModel.add(linkTo(methodOn(ProductController.class).deleteItem(id)).withRel("delete"));
 
-		return productService.getProWithId(id);
+		return entityModel;
 	}
 
 	@PutMapping("/products/{id}")
 	@Operation(summary = "change the price of product")
 	public ResponseEntity<Product> updateItem(@PathVariable UUID id, @RequestBody ProductDTO productDto) {
-
-		return productService.updateProd(id, productDto);
+		Product updatedProduct = productService.updateProd(id, productDto);
+		return ResponseEntity.ok(updatedProduct);
 	}
 
 	@DeleteMapping("/products/{id}")
 	@Operation(summary = "to destroy the product(if in-case)")
 	public ResponseEntity<Void> deleteItem(@PathVariable("id") UUID id) {
-		
-		return productService.deleteProd(id);
+		productService.deleteProd(id);
+		return ResponseEntity.noContent().build();
 	}
 }

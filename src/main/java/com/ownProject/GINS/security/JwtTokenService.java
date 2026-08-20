@@ -13,7 +13,7 @@ import org.springframework.stereotype.Service;
 @Service
 public class JwtTokenService {
 
-	private JwtEncoder jwtEncoder;
+	private final JwtEncoder jwtEncoder;
 	
 	public JwtTokenService(JwtEncoder jwtEncoder) {
 		super();

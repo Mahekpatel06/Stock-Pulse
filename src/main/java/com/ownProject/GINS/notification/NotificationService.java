@@ -1,9 +1,9 @@
 package com.ownProject.GINS.notification;
 
 import com.ownProject.GINS.jpa.NotificationRepository;
+import com.ownProject.GINS.exception.customExpClasses.ResourceNotFoundException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -11,8 +11,11 @@ import java.util.List;
 @Service
 public class NotificationService {
 
-    private NotificationRepository notificRepository;
+    private final NotificationRepository notificRepository;
 
+    public NotificationService(NotificationRepository notificRepository) {
+        this.notificRepository = notificRepository;
+    }
 
     public List<Notification> getAllNotfic() {
         return notificRepository.findAll();
@@ -22,12 +25,12 @@ public class NotificationService {
         return notificRepository.findAll(pageable);
     }
 
-    public ResponseEntity<Notification> markNotificAsRead(Integer id) {
+    public Notification markNotificAsRead(Integer id) {
         Notification note = notificRepository.findById(id)
-                .orElseThrow( () -> new RuntimeException("Notification not Found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Notification not found with id: " + id));
 
-        note.setStatus(1);		// 1 = READ
+        note.setStatus(1); // 1 = READ
 
-        return ResponseEntity.ok(notificRepository.save(note));
+        return notificRepository.save(note);
     }
 }
