@@ -30,13 +30,14 @@ public class WareHouse implements Serializable {
 	private LocalDateTime timeZone;
 	
 	private Boolean is_active;
+	private String contactEmail;
 	
 	public WareHouse() {
 		super();
 	}
  	
 	public WareHouse(Integer id, String name, String locationCity, String countryCode, LocalDateTime timeZone,
-			Boolean is_active) {
+			Boolean is_active, String contactEmail) {
 		super();
 		this.id = id;
 		this.name = name;
@@ -44,6 +45,15 @@ public class WareHouse implements Serializable {
 		this.countryCode = countryCode;
 		this.timeZone = timeZone;
 		this.is_active = is_active;
+		this.contactEmail = contactEmail;
+	}
+	
+	public String getContactEmail() {
+		return contactEmail;
+	}
+
+	public void setContactEmail(String contactEmail) {
+		this.contactEmail = contactEmail;
 	}
 	
 	public Integer getId() {
@@ -86,7 +96,7 @@ public class WareHouse implements Serializable {
 	@Override
 	public String toString() {
 		return "WareHouse [id=" + id + ", name=" + name + ", locationCity=" + locationCity + ", countryCode="
-				+ countryCode + ", timeZone=" + timeZone + ", is_active=" + is_active + "]";
+				+ countryCode + ", timeZone=" + timeZone + ", is_active=" + is_active + ", contactEmail=" + contactEmail + "]";
 	}
 	
 	

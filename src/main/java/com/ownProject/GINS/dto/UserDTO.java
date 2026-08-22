@@ -1,13 +1,16 @@
 package com.ownProject.GINS.dto;
 
 import com.ownProject.GINS.role.Role;
-
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
+import jakarta.validation.constraints.NotBlank;
 
 public class UserDTO {
 
+	@NotBlank(message = "Username is required")
 	public String name;
+
+	@NotBlank(message = "Password is required")
 	public String password;
 	
 	@Enumerated(EnumType.STRING)

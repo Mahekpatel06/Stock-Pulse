@@ -22,6 +22,7 @@ import com.ownProject.GINS.dto.ProductDTO;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 
 @RestController
 @Tag(name = "Product APIs")
@@ -41,7 +42,7 @@ public class ProductController {
 
 	@PostMapping("/products")
 	@Operation(summary = "add new product")
-	public ResponseEntity<Object> addItem(@RequestBody ProductDTO productDto) {
+	public ResponseEntity<Object> addItem(@Valid @RequestBody ProductDTO productDto) {
 		Product savedProduct = productService.addProduct(productDto);
 		URI location = ServletUriComponentsBuilder.fromCurrentRequest().path("/{id}")
 				.buildAndExpand(savedProduct.getId()).toUri();
@@ -64,7 +65,7 @@ public class ProductController {
 
 	@PutMapping("/products/{id}")
 	@Operation(summary = "change the price of product")
-	public ResponseEntity<Product> updateItem(@PathVariable UUID id, @RequestBody ProductDTO productDto) {
+	public ResponseEntity<Product> updateItem(@PathVariable UUID id, @Valid @RequestBody ProductDTO productDto) {
 		Product updatedProduct = productService.updateProd(id, productDto);
 		return ResponseEntity.ok(updatedProduct);
 	}

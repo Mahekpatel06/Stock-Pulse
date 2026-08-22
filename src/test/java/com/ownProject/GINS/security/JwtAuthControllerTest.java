@@ -55,8 +55,8 @@ class JwtAuthControllerTest {
 
         String result = jwtAuthController.register(dto);
 
-        // the registration incorrectly permits saving users as ADMIN...
-        assertTrue(result.contains("ADMIN"));
+        // Verify that the privilege escalation protection defaults the role to BUYER when ADMIN is requested.
+        assertTrue(result.contains("BUYER")); 
         verify(userRepository, times(1)).save(any(User.class));
     }
 }

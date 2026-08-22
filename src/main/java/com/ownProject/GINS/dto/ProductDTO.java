@@ -1,18 +1,30 @@
 package com.ownProject.GINS.dto;
 
 import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 
 public class ProductDTO {
 
+	@NotBlank(message = "Product name is required")
 	public String name;
 	
-	@Min(0)
+	@NotNull(message = "Product price is required")
+	@Min(value = 0, message = "Price must be positive")
 	public Double price;
 	
+	@NotBlank(message = "Product category is required")
 	public String category;
+
+	@NotNull(message = "Low stock threshold is required")
+	@Min(value = 0, message = "Threshold must be positive")
 	public Integer low_stock_threshold;
 
-	public ProductDTO(String name, @Min(0) Double price, String category, Integer low_stock_threshold) {
+	public ProductDTO() {
+		super();
+	}
+
+	public ProductDTO(String name, Double price, String category, Integer low_stock_threshold) {
 		super();
 		this.name = name;
 		this.price = price;

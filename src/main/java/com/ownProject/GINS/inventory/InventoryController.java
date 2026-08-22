@@ -38,8 +38,8 @@ import jakarta.validation.Valid;
 @Tag(name = "Inventory APIs")
 public class InventoryController {
 
-	private InventoryRepository inventoryRepository;
-	private InventoryService inventoryService;
+	private final InventoryRepository inventoryRepository;
+	private final InventoryService inventoryService;
 	
 	public InventoryController(InventoryRepository inventoryRepository, InventoryService inventoryService) {
 		this.inventoryRepository = inventoryRepository;

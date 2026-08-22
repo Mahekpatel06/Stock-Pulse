@@ -15,6 +15,7 @@ import com.ownProject.GINS.user.User;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 
 @RestController
 @Tag(name = "Jwt Auth APIs")
@@ -36,7 +37,7 @@ public class JwtAuthController {
 
 	@PostMapping("/register")
 	@Operation(summary = "First Do Register into Stock Pulse")
-	public String register(@RequestBody UserDTO userDTO) {
+	public String register(@Valid @RequestBody UserDTO userDTO) {
 	    
 	    // 1. Create a new Entity object
 	    User user = new User();
@@ -47,7 +48,7 @@ public class JwtAuthController {
 	    user.setPassword(passwordEncoder.encode(userDTO.getPassword()));
 	    
 	    if(role == null || role == Role.ADMIN) {
-	        user.setRole(user.getRole().ADMIN); 
+	        user.setRole(Role.BUYER); 
 	    } else {
 	        user.setRole(role);
 	    }
@@ -60,7 +61,7 @@ public class JwtAuthController {
 	
 	@PostMapping("/login")
 	@Operation(summary = "login into Stock Pulse to explore")
-	public ResponseEntity<JwtTokenResponse> authenticate(@RequestBody UserDTO request) {
+	public ResponseEntity<JwtTokenResponse> authenticate(@Valid @RequestBody UserDTO request) {
 		
 		var authentication = authenticationManager.authenticate
 				(new UsernamePasswordAuthenticationToken(request.getName(), request.getPassword()));

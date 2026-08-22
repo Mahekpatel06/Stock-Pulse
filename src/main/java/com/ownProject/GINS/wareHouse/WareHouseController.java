@@ -20,6 +20,7 @@ import com.ownProject.GINS.dto.WareHouseDTO;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 
 @RestController
 @Tag(name = "Ware_House APIs")
@@ -53,7 +54,7 @@ public class WareHouseController {
 	
 	@PostMapping("/warehouses")
 	@Operation(summary = "add new warehouse")
-	public ResponseEntity<Object> builtNewWareHouse(@RequestBody WareHouseDTO warehouseDto) {
+	public ResponseEntity<Object> builtNewWareHouse(@Valid @RequestBody WareHouseDTO warehouseDto) {
 		WareHouse builtWh = wareHouseService.builtNewWh(warehouseDto);
 		URI location = ServletUriComponentsBuilder.fromCurrentRequest().path("/{id}")
 				.buildAndExpand(builtWh.getId()).toUri();
@@ -62,7 +63,7 @@ public class WareHouseController {
 	
 	@PutMapping("/warehouses/{id}")
 	@Operation(summary = "change details about warehouse")
-	public ResponseEntity<WareHouse> updateWareHouse(@PathVariable int id, @RequestBody WareHouseDTO warehouseDto) {
+	public ResponseEntity<WareHouse> updateWareHouse(@PathVariable int id, @Valid @RequestBody WareHouseDTO warehouseDto) {
 		WareHouse updatedWrh = wareHouseService.updateWh(id, warehouseDto);
 		return ResponseEntity.ok(updatedWrh);
 	}

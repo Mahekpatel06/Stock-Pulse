@@ -34,6 +34,7 @@ public class WareHouseService {
         wh.setLocationCity(warehouseDto.getLocationCity());
         wh.setCountryCode(warehouseDto.getCountryCode());
         wh.setIs_active(warehouseDto.getIs_active());
+        wh.setContactEmail(warehouseDto.getContactEmail());
 
         return wareHouseRepository.save(wh);
     }
@@ -45,6 +46,7 @@ public class WareHouseService {
             existingWh.setLocationCity(warehouseDto.getLocationCity());
             existingWh.setCountryCode(warehouseDto.getCountryCode());
             existingWh.setIs_active(warehouseDto.getIs_active());
+            existingWh.setContactEmail(warehouseDto.getContactEmail());
 
             return wareHouseRepository.save(existingWh);
         }).orElseThrow(() -> new ResourceNotFoundException("WareHouse not found with id " + id));
