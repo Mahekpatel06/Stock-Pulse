@@ -21,10 +21,10 @@ import jakarta.validation.Valid;
 @Tag(name = "Jwt Auth APIs")
 public class JwtAuthController {
 	
-	private JwtTokenService jwtTokenService;
-	private PasswordEncoder passwordEncoder;
-	private AuthenticationManager authenticationManager;
-	private UserRepository userRepository;
+	private final JwtTokenService jwtTokenService;
+	private final PasswordEncoder passwordEncoder;
+	private final AuthenticationManager authenticationManager;
+	private final UserRepository userRepository;
 	
 	public JwtAuthController(JwtTokenService jwtTokenService, PasswordEncoder passwordEncoder,
 			AuthenticationManager authenticationManager, UserRepository userRepository) {

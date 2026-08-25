@@ -107,21 +107,16 @@ public class JwtSecurityConfig {
 //	}
 	
 	@Bean
-	public PasswordEncoder passwordEncoder() {
-		return PasswordEncoderFactories.createDelegatingPasswordEncoder();
-	}
-	
-	@Bean
-	public BCryptPasswordEncoder PasswordEncoder() {
+	public BCryptPasswordEncoder passwordEncoder() {
 		return new BCryptPasswordEncoder();
 	}
 	
-	@Value("classpath:certs/public.pem")
-//	@Value("${RSA_PUBLIC_KEY}")
+//	@Value("classpath:certs/public.pem")
+	@Value("${RSA_PUBLIC_KEY}")
 	private RSAPublicKey publicKey;
 	
-	@Value("classpath:certs/private.pem")
-//	@Value("${RSA_PRIVATE_KEY}")
+//	@Value("classpath:certs/private.pem")
+	@Value("${RSA_PRIVATE_KEY}")
 	private RSAPrivateKey privateKey;
 	
 	
