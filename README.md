@@ -11,7 +11,7 @@
 
 ## 💡 Core Concepts & Architecture Explained
 
-Here is how GINS manages complex backend tasks in an understandable, plain-English way:
+Here is how GINS manages complex backend tasks : 
 
 ### 1. 🔐 Asymmetric JWT Security (Security & Identity Gate)
 * **What it does:** GINS protects its APIs using JSON Web Tokens (JWT). When a user registers or logs in, the server generates a cryptographically signed token.
@@ -78,17 +78,17 @@ Create a `.env` file in the root folder of the project (this file is ignored by 
 
 ```bash
 # Database connection settings
-DB_URL=jdbc:mysql://localhost:3306/gins_db?createDatabaseIfNotExist=true
-DB_USERNAME=your_mysql_username
-DB_PASSWORD=your_mysql_password
+DB_URL=jdbc:mysql://<host>:<port>/<database_name>?createDatabaseIfNotExist=true
+DB_USERNAME=<your_mysql_username>
+DB_PASSWORD=<your_mysql_password>
 
 # Asymmetric RSA keys in PEM format (paste the raw text of public.pem & private.pem)
-RSA_PUBLIC_KEY="-----BEGIN PUBLIC KEY-----\nMIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEA...\n-----END PUBLIC KEY-----"
-RSA_PRIVATE_KEY="-----BEGIN PRIVATE KEY-----\nMIIEvgIBADANBgkqhkiG9w0BAQEFAASCBKgwggSkAgEA...\n-----END PRIVATE KEY-----"
+RSA_PUBLIC_KEY=<enter_your_public_key>
+RSA_PRIVATE_KEY=<enter_your_private_key>
 
 # SMTP Settings for Low-Stock Notifications (e.g. Mailtrap)
-SMTP_USERNAME=your_smtp_username
-SMTP_PASSWORD=your_smtp_password
+SMTP_USERNAME=<your_smtp_username>
+SMTP_PASSWORD=<your_smtp_password>
 ```
 
 ---
