@@ -1,121 +1,190 @@
-# 🚀 Stock-Pulse (Global Inventory & Notification System)
+# 🚀 GINS (Global Inventory & Notification System)
 
 [![License](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 [![Java](https://img.shields.io/badge/Java-21-orange.svg)](https://www.oracle.com/java/)
-[![Spring Boot](https://img.shields.io/badge/Spring_Boot-3.x_/_4.x-green.svg)](https://spring.io/projects/spring-boot)
+[![Spring Boot](https://img.shields.io/badge/Spring_Boot-4.x-green.svg)](https://spring.io/projects/spring-boot)
 [![Docker](https://img.shields.io/badge/Docker-Enabled-blue.svg)](https://www.docker.com/)
 
-**Stock-Pulse** is an enterprise-grade Global Inventory & Warehouse Management backend system designed for high-concurrency environments. It manages distributed products, inventories, and warehouses while enforcing strict transactional integrity, real-time alerting, and robust security.
+**GINS** (Stock-Pulse) is an enterprise-grade backend system designed for high-concurrency inventory, product, and warehouse management. It features transactional integrity, non-blocking real-time notifications, dynamic routing, and asymmetric JWT authorization.
 
 ---
 
-## 🛠️ Advanced Architectural Features
+## 💡 Core Concepts & Architecture Explained
 
-This application implements several industry-standard practices, making it highly secure, fault-tolerant, and performant:
+Here is how GINS manages complex backend tasks in an understandable, plain-English way:
 
-### 1. 🔐 Security & Identity Control
-*   **Asymmetric JWT Signatures**: Uses public/private RSA-2048 key pairs loaded from externalized environment variables to sign and verify JSON Web Tokens (JWT).
-*   **Role-Based Access Control (RBAC)**: Secure authorization mappings for `ADMIN`, `SELLER`, and `BUYER` roles.
-*   **Privilege Escalation Protection**: Ensures default registrations strictly assign the `BUYER` role, rejecting unauthorized requests to create `ADMIN` accounts.
+### 1. 🔐 Asymmetric JWT Security (Security & Identity Gate)
+* **What it does:** GINS protects its APIs using JSON Web Tokens (JWT). When a user registers or logs in, the server generates a cryptographically signed token.
+* **Why it's secure:** It uses **Asymmetric RSA-2048 key pairs** (a private key and a public key). The server signs the token using the private key, and verifies it using the public key. The private key never leaves the secure server environment.
+* **Roles & Permissions:** Users are assigned roles (`BUYER`, `SELLER`, `ADMIN`). Certain endpoints (like adding stock or transferring items) are locked to `ADMIN` and `SELLER` only.
+* **Privilege Escalation Protection:** The system defaults all new registrations to the `BUYER` role. Even if a client requests an `ADMIN` role during registration, it is overridden and saved as `BUYER` to prevent security breaches.
 
-### 2. ⚡ Concurrency Control (Race Condition Prevention)
-To eliminate lost updates and race conditions (e.g., two buyers purchasing the last item at the exact same millisecond):
-*   **Optimistic Locking**: Implemented via JPA `@Version` on the `Inventory` entity to detect and reject outdated updates.
-*   **Pessimistic Locking**: Configured `@Lock(LockModeType.PESSIMISTIC_WRITE)` (`SELECT FOR UPDATE`) on critical database operations (like stock reduction and transfers) to serialize writes on hot rows under heavy traffic.
+### 2. ⚡ Race Condition Prevention (Concurrency Control)
+When thousands of buyers try to purchase the same hot product at the exact same millisecond, standard databases can suffer from "lost updates" (selling items that are out of stock). GINS solves this using two mechanisms:
+* **Pessimistic Locking:** When a sale/transfer request comes in, the server uses `@Lock(LockModeType.PESSIMISTIC_WRITE)`. This tells the database to execute a `SELECT ... FOR UPDATE`, locking the inventory row. Any other requests trying to edit the same row are forced to wait in line until the transaction finishes.
+* **Optimistic Locking:** GINS also includes JPA `@Version` tracking on the `Inventory` entity. If two requests somehow bypass the lock, the version mismatch is detected, and the database automatically rolls back the second transaction to prevent corrupted data.
 
 ### 3. 📧 Non-Blocking Asynchronous Notifications
-*   **AOP Proxy Bypass Resolved**: Separated notification logic into a dedicated `NotificationService` to ensure Spring AOP proxies execute the `@Async` annotation correctly on a background thread pool.
-*   **Dynamic Mail Routing**: Automatically resolves the contact email of the specific warehouse manager where a low-stock event occurred, utilizing externalized configurations and fallback addresses.
+* **What it does:** If product stock falls below the threshold, GINS alerts the warehouse manager.
+* **Non-Blocking Execution:** Sending an email takes time (1-3 seconds). To prevent the user's screen from lagging, the system spawns the alert on a separate thread pool (`@Async`), allowing the purchase request to finish instantly while the email is sent in the background.
+* **Dynamic Routing:** Instead of hardcoded support emails, GINS dynamically queries the specific warehouse manager's contact details to route the email dynamically.
 
-### 4. 📐 JSR-380 Payload Validation & Global Exception Mapping
-*   **Strict Validation**: Enforces payload checks on controllers using `@Valid` combined with JSR-380 validation annotations (`@NotBlank`, `@Min`, `@Email`, `@Size`), rejecting malformed payloads before hitting the database.
-*   **Standardized REST Error Payloads**: Implements `@RestControllerAdvice` to intercept exceptions (e.g., `InsufficientStockException`, `ResourceNotFoundException`) and translate them into consistent client-friendly JSON error payloads.
-
----
-
-## 🏗️ System Architecture & Data Flow
-
-```mermaid
-sequenceDiagram
-    autonumber
-    Client ->> Controller: PUT /inventory/sell?productId=...&warehouseId=...&qty=6
-    Note over Controller: Checks JWT token validity & role permissions
-    Controller ->> InventoryService: sellProduct(productId, warehouseId, qty)
-    Note over InventoryService: Fetches Inventory with Pessimistic Write Lock
-    Note over InventoryService: Verifies optimistic @Version matches
-    Note over InventoryService: Subtracts stock in MySQL database
-    alt Stock falls below Product threshold
-        InventoryService ->>> NotificationService: triggerLowStockAlert(inventory)
-        Note over NotificationService: Spawns background task (Asynchronous)
-        NotificationService -->> Database: Saves alert in Notification table (unread)
-        NotificationService -->> SMTP (Mailtrap): Connects and sends Alert Email
-    end
-    InventoryService ->> Database: Saves audit log to Transaction table
-    InventoryService -->> Controller: Returns updated Inventory entity
-    Controller -->> Client: 200 OK (Instant response)
-```
+### 4. 📐 Payload Validation & Exception Mapping
+* **Validations:** Every request payload is checked using Spring validations (e.g., ensuring quantity is not negative, email is valid, names are not blank) before the system accesses the database.
+* **Custom Error Handling:** If a transaction fails (e.g., `InsufficientStockException`), a global error advisor (`@RestControllerAdvice`) converts the Java exception stack trace into a clean, client-friendly JSON response.
 
 ---
 
-## 🗄️ Database Schema
+## 🗄️ Database Entities Overview
 
-The database model is composed of the following entities:
-*   `Product`: Item specifications and low-stock threshold settings.
-*   `WareHouse`: Physical facilities with localized settings and manager contacts.
-*   `Inventory`: Relational entity linking Products to Warehouses, with a version counter for optimistic locking.
-*   `Transaction`: Complete ledger recording all inbound, outbound, and transfer operations.
-*   `Notification`: Log of all triggered low-stock alerts.
-*   `User`: Authentication database mapping users to roles.
+* `Product`: Specifications, pricing, and safety low-stock threshold settings.
+* `WareHouse`: Physical facilities containing contact details for dynamic alerts.
+* `Inventory`: Maps products to warehouses with specific stock counts and optimistic `@Version` counters.
+* `Transaction`: Logs every movement (Inbound, Outbound/Sale, and Transfers between warehouses).
+* `Notification`: History logs of triggered low-stock alerts.
+* `User`: Credentials, password hashes, and authorization roles.
 
 ---
 
-## 🚀 Getting Started
+## 🚀 Getting Started & Local Setup
 
-### 📋 Environment Variables
-The application reads its production configuration from environment variables. Create a local `.env` file (which is ignored by Git) with these keys:
+If you have forked this repository, follow these steps to run the project on your machine.
+
+### 📋 Prerequisites
+Make sure you have the following installed:
+* **Java 21** or higher
+* **Maven 3.x**
+* **MySQL Database**
+* **Redis Server** (optional, used for caching/timeouts)
+
+---
+
+### 🔑 Step 1: RSA Key Generation
+JWT tokens require RSA-2048 private and public keys. You can generate them using `openssl` in your terminal:
 
 ```bash
-# Database Settings
-DB_URL=jdbc:mysql://<your-db-host>:<port>/<db-name>
-DB_USERNAME=<your-username>
-DB_PASSWORD=<your-password>
+# Generate private key
+openssl genrsa -out keypair.pem 2048
 
-# SMTP Server Settings (e.g., Mailtrap / Gmail)
-SMTP_USERNAME=<your-smtp-username>
-SMTP_PASSWORD=<your-smtp-password>
-
-# JWT Security Signature Keys
-RSA_PUBLIC_KEY=<your-rsa-public-key-pem>
-RSA_PRIVATE_KEY=<your-rsa-private-key-pem>
+# Extract public key from the keypair
+openssl rsa -in keypair.pem -pubout -out public.pem
 ```
-
-### 📦 Local Execution with Maven
-1.  Generate your RSA public and private keys using OpenSSL and save them in the environment.
-2.  Start your local database and Redis server.
-3.  Run the application using:
-    ```bash
-    mvn spring-boot:run
-    ```
+For local testing, you can also locate ready-to-use keys inside the project at `src/main/resources/certs/private.pem` and `public.pem`.
 
 ---
 
-## 🔗 API Documentation
-Swagger UI auto-documentation is available locally at:
-```text
-http://localhost:10000/docs
+### ⚙️ Step 2: Environment Variables
+Create a `.env` file in the root folder of the project (this file is ignored by Git to protect your secrets). Add the following variables:
+
+```bash
+# Database connection settings
+DB_URL=jdbc:mysql://localhost:3306/gins_db?createDatabaseIfNotExist=true
+DB_USERNAME=your_mysql_username
+DB_PASSWORD=your_mysql_password
+
+# Asymmetric RSA keys in PEM format (paste the raw text of public.pem & private.pem)
+RSA_PUBLIC_KEY="-----BEGIN PUBLIC KEY-----\nMIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEA...\n-----END PUBLIC KEY-----"
+RSA_PRIVATE_KEY="-----BEGIN PRIVATE KEY-----\nMIIEvgIBADANBgkqhkiG9w0BAQEFAASCBKgwggSkAgEA...\n-----END PRIVATE KEY-----"
+
+# SMTP Settings for Low-Stock Notifications (e.g. Mailtrap)
+SMTP_USERNAME=your_smtp_username
+SMTP_PASSWORD=your_smtp_password
 ```
+
+---
+
+### 📦 Step 3: Run the Application
+
+#### Option A: Running with Maven (Local Dev)
+1. Ensure your local MySQL and Redis servers are running.
+2. In the project root, run:
+   ```bash
+   mvn spring-boot:run
+   ```
+
+#### Option B: Running with Docker Compose (Containerized Dev)
+This is the easiest way to launch the app and its database dependencies without manual installation.
+Run:
+```bash
+docker-compose up --build
+```
+The app will start on port `10000`.
 
 ---
 
 ## 🧪 Running Tests
-Isolated unit and integration tests run on an in-memory H2 database:
+To run unit and integration tests (which run in-memory using an H2 database):
 ```bash
-./mvnw clean test
+mvn clean test
 ```
+
+---
+
+## 🌐 Trying the APIs
+
+Once GINS is running, you can interact with all APIs using the built-in **Swagger UI** or via Client tools (like Postman or cURL).
+
+### 📖 Swagger UI
+Open your browser and navigate to:
+```text
+http://localhost:10000/docs
+```
+
+### 🛠️ Step-by-Step API Walkthrough
+
+To try the full flow, perform the following API calls in Swagger or Postman:
+
+#### 1. Register a User
+Send a `POST` request to `/register` with a username and password. This will default to the `BUYER` role. If you want to perform administrative tasks, register with `SELLER`.
+* **Endpoint:** `POST http://localhost:10000/register`
+* **Request Body:**
+  ```json
+  {
+    "name": "john_doe",
+    "password": "securepassword123",
+    "role": "SELLER"
+  }
+  ```
+
+#### 2. Log in and retrieve the JWT Token
+Authenticate with the registered credentials to receive your security token.
+* **Endpoint:** `POST http://localhost:10000/login`
+* **Request Body:**
+  ```json
+  {
+    "name": "john_doe",
+    "password": "securepassword123"
+  }
+  ```
+* **Response:**
+  ```json
+  {
+    "token": "eyJhbGciOiJSUzI1NiIsIn..."
+  }
+  ```
+
+#### 3. Authorize your Swagger UI / Client Requests
+* In Swagger UI, click the **"Authorize"** button at the top right.
+* Type `Bearer <paste-your-token-here>` into the input box and click Authorize.
+* For Postman or cURL, add the header: `Authorization: Bearer <your-jwt-token>`.
+
+#### 4. Try Core Operations (Requires ADMIN/SELLER Token)
+* **Create a Warehouse:**
+  `POST /warehouses` with layout configuration.
+* **Create a Product:**
+  `POST /products` with safety threshold configurations.
+* **Inbound / Add Stock:**
+  `POST /inventory/add` to stock a product in a warehouse.
+* **Sell Product (Simulate purchases):**
+  `PUT /inventory/sell?productId=<id>&warehouseId=<id>&qty=<amount>`
+* **Transfer Stock:**
+  `POST /inventory/transfer?productId=<id>&fromWhId=<id>&toWhId=<id>&qty=<amount>`
+* **View Transactions / Notifications:**
+  `GET /transactions` and `GET /notifications` to review stock movements and generated alerts.
 
 ---
 
 ## 👨‍💻 Author
 **Mahek Patel**  
-GitHub: [Mahekpatel06](https://github.com/Mahekpatel06)  
+GitHub: [@Mahekpatel06](https://github.com/Mahekpatel06)  
 License: Apache 2.0
