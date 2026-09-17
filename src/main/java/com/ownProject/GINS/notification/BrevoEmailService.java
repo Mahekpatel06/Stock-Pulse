@@ -47,10 +47,20 @@ public class BrevoEmailService {
      * @param textContent  Plain text fallback
      * @return true if successfully sent, false otherwise
      */
-    public boolean sendEmail(String toEmail, String toName, String subject, String htmlContent, String textContent) {
+    public Map<String, Object> sendEmailWithDiagnostics(String toEmail, String toName, String subject, String htmlContent, String textContent) {
+        Map<String, Object> result = new HashMap<>();
+        result.put("apiKeyConfigured", (apiKey != null && !apiKey.isBlank()));
+        result.put("apiKeyPrefix", (apiKey != null && apiKey.length() > 8) ? (apiKey.substring(0, 8) + "...") : "NOT_SET");
+        result.put("senderEmail", senderEmail);
+        result.put("senderName", senderName);
+        result.put("recipientEmail", toEmail);
+
         if (apiKey == null || apiKey.trim().isEmpty()) {
-            log.warn("Brevo API key is not configured! (Set 'BREVO_API_KEY' environment variable). Email to {} was not sent.", toEmail);
-            return false;
+            String errorMsg = "Brevo API key is not configured! Please set 'BREVO_API_KEY' environment variable.";
+            log.warn(errorMsg);
+            result.put("success", false);
+            result.put("error", errorMsg);
+            return result;
         }
 
         try {
@@ -96,10 +106,19 @@ public class BrevoEmailService {
                     .body(String.class);
 
             log.info("Email successfully sent via Brevo to {}. Response: {}", toEmail, responseBody);
-            return true;
+            result.put("success", true);
+            result.put("brevoResponse", responseBody);
+            return result;
         } catch (Exception e) {
             log.error("Failed to send email to {} via Brevo API: {}", toEmail, e.getMessage());
-            return false;
+            result.put("success", false);
+            result.put("error", e.getMessage());
+            return result;
         }
+    }
+
+    public boolean sendEmail(String toEmail, String toName, String subject, String htmlContent, String textContent) {
+        Map<String, Object> result = sendEmailWithDiagnostics(toEmail, toName, subject, htmlContent, textContent);
+        return Boolean.TRUE.equals(result.get("success"));
     }
 }

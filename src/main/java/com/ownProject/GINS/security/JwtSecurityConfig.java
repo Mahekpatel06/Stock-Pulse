@@ -48,7 +48,7 @@ public class JwtSecurityConfig {
 							.requestMatchers("/inventory/add", 
 											 "/inventory/changeQty",
 											 "/inventory/transfer/**").hasAnyRole("ADMIN", "SELLER")
-							.requestMatchers("/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html", "/docs").permitAll()
+							.requestMatchers("/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html", "/docs", "/notifications/test-email").permitAll()
 							.anyRequest().authenticated())
 					.httpBasic(Customizer.withDefaults())
 					.sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))

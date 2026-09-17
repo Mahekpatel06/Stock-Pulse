@@ -14,15 +14,20 @@ import org.springframework.web.bind.annotation.RestController;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 
+import java.util.Map;
+import org.springframework.web.bind.annotation.RequestParam;
+
 @RestController
 @RequestMapping("/notifications")
 @Tag(name = "Notification APIs")
 public class NotificationController {
 
 	private final NotificationService notificService;
+	private final BrevoEmailService brevoEmailService;
 
-	public NotificationController(NotificationService notificService) {
+	public NotificationController(NotificationService notificService, BrevoEmailService brevoEmailService) {
 		this.notificService = notificService;
+		this.brevoEmailService = brevoEmailService;
 	}
 	
 	@GetMapping
@@ -42,5 +47,22 @@ public class NotificationController {
 	public ResponseEntity<Notification> markAsRead(@PathVariable Integer id) {
 		Notification updatedNotification = notificService.markNotificAsRead(id);
 		return ResponseEntity.ok(updatedNotification);
+	}
+
+	@GetMapping("/test-email")
+	@Operation(summary = "test Brevo email integration with live diagnostic report")
+	public ResponseEntity<Map<String, Object>> testEmail(@RequestParam(defaultValue = "taps2109@gmail.com") String to) {
+		Map<String, Object> result = brevoEmailService.sendEmailWithDiagnostics(
+				to,
+				"Warehouse Manager",
+				"🧪 Stock Pulse - Live Test Alert",
+				"<div style='font-family:Arial,sans-serif;padding:20px;border:1px solid #ddd;border-radius:8px;'>"
+						+ "<h2 style='color:#16a34a;'>✅ Stock Pulse Email Connection Verified!</h2>"
+						+ "<p>This is a test notification confirming that your Brevo API integration and Render environment variables are working properly.</p>"
+						+ "<p><strong>Recipient:</strong> " + to + "</p>"
+						+ "</div>",
+				"Stock Pulse Email Connection Verified! Your Brevo API integration is working properly."
+		);
+		return ResponseEntity.ok(result);
 	}
 }
