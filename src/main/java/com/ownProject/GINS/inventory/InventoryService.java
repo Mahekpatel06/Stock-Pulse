@@ -158,13 +158,18 @@ public class InventoryService {
 
 		existingInv.setQuantity(inventoryDto.getQty()); 
 	
-		inventoryRepository.save(existingInv);
+		Inventory savedInv = inventoryRepository.save(existingInv);
 		
-		recordTransaction(existingInv, existingInv.getQuantity(), Type.INBOUND, 
-				inventoryDto.getQty() + " " + existingInv.getProduct().getName() +
-				" added in Warehouse #" + existingInv.getWareHouse().getName());
+		recordTransaction(savedInv, inventoryDto.getQty(), Type.INBOUND, 
+				inventoryDto.getQty() + " " + savedInv.getProduct().getName() +
+				" added in Warehouse #" + savedInv.getWareHouse().getName());
 		
-		return convertToDTO(existingInv);
+		if (savedInv.getProduct() != null && savedInv.getProduct().getLow_stock_threshold() != null
+				&& savedInv.getQuantity() <= savedInv.getProduct().getLow_stock_threshold()) {
+			notificationService.triggerLowStockAlert(savedInv);
+		}
+
+		return convertToDTO(savedInv);
 	}
 
 	public void recordTransaction(Inventory inv, Integer qty, Type type, String reason) {
