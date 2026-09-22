@@ -110,13 +110,15 @@ public class JwtSecurityConfig {
 	public BCryptPasswordEncoder passwordEncoder() {
 		return new BCryptPasswordEncoder();
 	}
-	
-//	@Value("classpath:certs/public.pem")
-	@Value("${RSA_PUBLIC_KEY}")
+
+//		@Value("classpath:certs/public.pem")
+//		@Value("${RSA_PUBLIC_KEY}"
+	@Value("${RSA_PUBLIC_KEY:classpath:certs/public.pem}")
 	private RSAPublicKey publicKey;
-	
-//	@Value("classpath:certs/private.pem")
-	@Value("${RSA_PRIVATE_KEY}")
+
+//		@Value("classpath:certs/private.pem")
+//		@Value("${RSA_PRIVATE_KEY}")
+	@Value("${RSA_PRIVATE_KEY:classpath:certs/private.pem}")
 	private RSAPrivateKey privateKey;
 	
 	
