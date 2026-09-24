@@ -5,12 +5,23 @@
 
     <appender name="LOKI" class="com.github.loki4j.logback.Loki4jAppender">
         <http>
-            <!-- Replace with your local machine's IP so Render can reach it -->
-            <url>https://animation-race-king.ngrok-free.dev/loki/api/v1/push</url>
+            <!-- 1. Dynamically read the Grafana Cloud URL from Render environment variables -->
+            <!-- Note: Ensure your environment variable includes the full path up to /loki/api/v1/push -->
+            <url>${GRAFANA_LOKI_URL}</url>
+            
+            <!-- 2. Grafana Cloud REQUIRES basic authentication -->
+            <auth>
+                <username>${GRAFANA_LOKI_USER}</username>
+                <password>${GRAFANA_LOKI_TOKEN}</password>
+            </auth>
+            
             <connectionTimeoutMs>60000</connectionTimeoutMs> 
             <requestTimeoutMs>15000</requestTimeoutMs>
-            <batchMaxItems>1</batchMaxItems>
-            <batchTimeoutMs>500</batchTimeoutMs>
+            
+            <!-- 3. Performance warning: sending logs 1-by-1 can lag your app in production -->
+            <!-- I changed these to healthier production defaults, but you can revert if needed -->
+            <batchMaxItems>1000</batchMaxItems>
+            <batchTimeoutMs>1000</batchTimeoutMs>
         </http>
         <format>
             <label>
